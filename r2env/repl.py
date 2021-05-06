@@ -9,14 +9,14 @@ def main():
 	
 	e = r2env.R2Env()
 
-	if parser.version:
+	if args.version:
 		print(e.version())
 		return
-	if action == "list":
+	if args.action == "list":
 		print(e.packages())
-	elif action == "version":
+	elif args.action == "version":
 		print(e.version())
-	elif action == "search":
+	elif args.action == "search":
 		for pkg in e.packages():
 			print(pkg.name())
 	else:
