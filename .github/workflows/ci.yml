@@ -23,4 +23,4 @@ jobs:
     - name: Execute
       run: r2env help
     - name: Uninstalling
-      run: sudo setup.py uninstall
+      run: sudo python setup.py uninstall
