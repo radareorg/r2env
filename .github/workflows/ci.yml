@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+#  schedule:
+#    - cron: '0 0 * * 1'
+
+
+jobs:
+  build:
+    name: linux
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Build
+      run: python setup.py build
+    - name: Install
+      run: sudo python setup.py install
+    - name: Execute
+      run: r2env -v
+    - name: Uninstalling
+      run: sudo setup.py uninstall
