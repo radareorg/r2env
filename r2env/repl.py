@@ -53,6 +53,50 @@ def del_package(pkg, profile):
 	print("Deleting package")
 	pkg.clean(profile)
 
+def cb_use(sauce, prefix):
+	dploy.unstow([sauce], prefix)
+	dploy.stow(  [sauce], prefix)
+
+def cb_unuse(sauce, prefix):
+	dploy.unstow([dstdir], prefix)
+
+def match_dst(args, cb):
+	ret = False
+	envp = env_path()
+	if envp is None:
+		print("No r2env defined")
+		sys.exit(1)
+	prefix = os.path.join(envp, "prefix")
+	try:
+		os.mkdir(prefix)
+	except: pass
+	for arg in args:
+		dstdir = os.path.join(envp, "dst", arg)
+		if os.path.isdir(dstdir):
+			sauce = os.path.join(envp, "dst", arg, prefix[1:])
+			cb(sauce, prefix)
+			ret = True
+	return ret
+
+def match_pkg(pkgs, args, cb):
+	envp = env_path()
+	if envp is None:
+		print("No r2env defined")
+		sys.exit(1)
+	targets = autoversion(args)
+	for pkg in pkgs:
+		name = pkg.header["name"]
+		for profile in pkg.header["profiles"]:
+			namever = name + "@" + profile["version"] + "#" + profile["platform"]
+			if namever in args:
+				cb(pkg, profile)
+				return True
+			namever = name + "@" + profile["version"]
+			if namever in args:
+				cb(pkg, profile)
+				return True
+	return False
+
 def run_action(e, action, args):
 	if action == "list":
 		arg = args[0] if len(args) > 0 else ""
@@ -94,57 +138,18 @@ def run_action(e, action, args):
 					return True
 		print("Cannot find pkg")
 	elif action == "add":
-		envp = env_path()
-		if envp is None:
-			print("No r2env defined")
-			sys.exit(1)
 		targets = autoversion(args)
-		for pkg in e.available_packages():
-			name = pkg.header["name"]
-			for profile in pkg.header["profiles"]:
-				namever = name + "@" + profile["version"] + "#" + profile["platform"]
-				if namever in args:
-					add_package(pkg, profile)
-					return True
-				namever = name + "@" + profile["version"]
-				if namever in args:
-					add_package(pkg, profile)
-					return True
-		print("Cannot find pkg")
+		pkgs = e.available_packages()
+		if not match_pkg(pkgs, targets, add_package):
+			print("Cannot find pkg")
 	elif action == "use":
-		envp = env_path()
-		if envp is None:
-			print("No r2env defined")
-			sys.exit(1)
-		prefix = os.path.join(envp, "prefix")
-		try:
-			os.mkdir(prefix)
-		except: pass
-		for arg in args:
-			dstdir = os.path.join(envp, "dst", arg)
-			if os.path.isdir(dstdir):
-				sauce = os.path.join(envp, "dst", arg, prefix[1:])
-				dploy.unstow([sauce], prefix)
-				dploy.stow(  [sauce], prefix)
-			else:
-				print("Cannot find " + dstdir)
+		targets = autoversion(args)
+		if not match_dst(targets, cb_use):
+			print("Cannot find " + dstdir)
 	elif action == "unuse":
-		envp = env_path()
-		if envp is None:
-			print("No r2env defined")
-			sys.exit(1)
-		prefix = os.path.join(envp, "prefix")
-		try:
-			os.mkdir(prefix)
-		except: pass
-		for arg in args:
-			dstdir = os.path.join(envp, "dst", arg)
-			if os.path.isdir(dstdir):
-				print(dstdir)
-				print(prefix)
-				dploy.unstow([dstdir], prefix)
-			else:
-				print("Cannot find " + dstdir)
+		targets = autoversion(args)
+		if not match_dst(targets, cb_unuse):
+			print("Cannot find " + dstdir)
 	elif action == "help":
 		print(help_message)
 	elif action == "shell":

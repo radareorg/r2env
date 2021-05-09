@@ -22,6 +22,7 @@ r2profiles = [
 		"version": "5.2.1",
 		"platform": "unix",
 		"source": "https://github.com/radareorg/radare2",
+		"meson": True,
 		"tag": "5.2.1",
 		"needs": [ "git", "make", "patch" ]
 	},
@@ -34,6 +35,7 @@ r2profiles = [
 	{
 		"version": "5.1.0",
 		"platform": "unix",
+		"meson": True,
 		"source": "https://github.com/radareorg/radare2",
 		"tag": "5.1.0",
 		"needs": [ "git", "make", "patch" ]
@@ -41,6 +43,7 @@ r2profiles = [
 	{
 		"version": "5.0.0",
 		"platform": "unix",
+		"meson": True,
 		"source": "https://github.com/radareorg/radare2",
 		"tag": "5.0.0",
 		"needs": [ "git", "make", "patch" ]
