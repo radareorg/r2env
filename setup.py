@@ -12,6 +12,7 @@ setup(
     author_email="pancake@nopcode.org",
     url="https://www.radare.org",
     install_requires=[
+	"dploy>=0.1.2"
     ],
     license="MIT",
     zip_safe=True,
