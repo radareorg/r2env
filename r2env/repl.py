@@ -2,6 +2,8 @@ import argparse
 from r2env.tools import host_platform
 from r2env.tools import user_home
 from r2env.tools import env_path
+from r2env.tools import get_size
+from r2env.tools import slurp
 import r2env
 import dploy
 import sys
@@ -14,6 +16,7 @@ Actions:
 init      - create .r2env in current directory
 path      - display current .r2env settings
 list      - list packages
+rm [pkg]  - remove pkg
 add [pkg] - build and install given package
 use [pkg] - set symlinks using dploy/stow into .r2env/prefix
 version   - show version string
@@ -39,7 +42,11 @@ def run_action(e, action, args):
 	if action == "list":
 		print("## Installed:")
 		for pkg in e.installed_packages():
-			print(pkg.tostring())
+			pkgdir = os.path.join(env_path(), "dst", pkg)
+			print(pkgdir)
+			ts = slurp(os.path.join(pkgdir, ".timestamp.txt"))
+			sz = str(get_size(pkgdir))
+			print(pkg.tostring() + "  " + sz + "  " + ts)
 		print("## Available:")
 		for pkg in e.available_packages():
 			print(pkg.tostring())

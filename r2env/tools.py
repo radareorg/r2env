@@ -14,6 +14,13 @@ def user_home():
 	from pathlib import Path
 	return str(Path.home())
 
+def slurp(f):
+	try:
+		f = open(f,"r")
+		return str(f.read()).strip()
+	except:
+		return ""
+
 def env_path():
 	oldcwd = os.getcwd()
 	while True:
@@ -47,3 +54,13 @@ def check(tools):
 			print("found " + tool)
 		else:
 			print("oops  " + tool)
+
+def get_size(start_path = '.'):
+	total_size = 0
+	for dirpath, dirnames, filenames in os.walk(start_path):
+		for f in filenames:
+			fp = os.path.join(dirpath, f)
+			# skip if it is symbolic link
+			if not os.path.islink(fp):
+				total_size += os.path.getsize(fp)
+	return total_size

@@ -18,10 +18,13 @@ def list():
 	return res
 
 def clean(pkgname):
-	pkgdir=os.path.join(src, pkgname)
+	srcdir=os.path.join(env_path(), "src")
+	pkgdir=os.path.join(srcdir, pkgname)
 	if os.path.exists(pkgdir) and os.path.isdir(pkgdir):
-		dploy.unstow('')
+		dploy.unstow(pkgdir, prefix)
 		shutil.rmtree(pkgdir)
+	else:
+		print("Nothing to do")
 
 def uninstall():
 	res = []
