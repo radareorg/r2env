@@ -9,12 +9,11 @@ from r2env.tools import env_path
 # dstdir=os.path.join(env_path(), 'dst')
 
 def list():
-	dstdir=os.path.join(env_path(), 'dst')
+	dstdir = os.path.join(env_path(), "dst")
 	res = []
 	if os.path.isdir(dstdir):
 		for d in os.listdir(dstdir):
-			print(d)
-		# list names of installed packages
+			res.append(d)
 	return res
 
 def clean(pkgname):

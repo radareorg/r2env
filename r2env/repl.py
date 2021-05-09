@@ -43,10 +43,9 @@ def run_action(e, action, args):
 		print("## Installed:")
 		for pkg in e.installed_packages():
 			pkgdir = os.path.join(env_path(), "dst", pkg)
-			print(pkgdir)
 			ts = slurp(os.path.join(pkgdir, ".timestamp.txt"))
-			sz = str(get_size(pkgdir))
-			print(pkg.tostring() + "  " + sz + "  " + ts)
+			sz = str(int(get_size(pkgdir) / (1024 * 1024))) + " MB"
+			print(pkg + "  |  " + sz + "  |  " + ts)
 		print("## Available:")
 		for pkg in e.available_packages():
 			print(pkg.tostring())

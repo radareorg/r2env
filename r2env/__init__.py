@@ -1,6 +1,7 @@
 from r2env.package import Package
 from r2env.repl import main
 import r2env.ipdb
+import os
 
 
 def load_packages(cfg):
@@ -20,8 +21,8 @@ class R2Env:
 	def __init__(self):
 		self.db = load_packages(cfg)
 	def init(self):
-		print(user_home())
-		os.mkdir(".r2env")
+		if not os.path.isdir(".r2env"):
+			os.mkdir(".r2env")
 	def version(self):
 		return "0.2.0"
 	def available_packages(self):
