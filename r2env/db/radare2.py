@@ -51,6 +51,8 @@ def build_radare2(options):
 	os.system("(cd " + srcdir + "/radare2; git clean -xdf; rm -rf shlr/capstone; ./configure --prefix="+dstdir+" 2>&1;make -j4 2>&1 && make install) > " + logfil)
 	# clone radare2 in srcdir
 	os.system("date > "+dstdir+"/.timestamp.txt")
+	os.system("git log |head -n1> "+dstdir+"/.commit.txt")
+	
 
 class Radare2(r2env.Package):
 	header = {
@@ -61,6 +63,4 @@ class Radare2(r2env.Package):
 		print("Building radare2")
 		build_radare2(options)
 		print("magic done")
-	def install(self):
-		install_radare2()
 

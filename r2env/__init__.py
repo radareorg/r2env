@@ -22,10 +22,8 @@ class R2Env:
 	def init(self):
 		print(user_home())
 		os.mkdir(".r2env")
-	def du(self):
-		return "0KB"
 	def version(self):
-		return "0.1.0"
+		return "0.2.0"
 	def available_packages(self):
 		return self.db
 	def installed_packages(self):

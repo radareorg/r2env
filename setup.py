@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="r2env",
-    version="0.1.0",
+    version="0.2.0",
     description="radare2 environment management tool",
     long_description="Easily install multiple versions of r2 and its plugins from source or binary on any platform",
     long_description_content_type="text/markdown",
