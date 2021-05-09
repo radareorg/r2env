@@ -90,6 +90,9 @@ def run_action(e, action, args):
 		print("Cannot find pkg")
 	elif action == "use":
 		envp = env_path()
+		if envp is None:
+			print("No r2env defined")
+			sys.exit(1)
 		prefix = os.path.join(envp, "prefix")
 		try:
 			os.mkdir(prefix)
