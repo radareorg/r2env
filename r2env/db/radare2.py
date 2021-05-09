@@ -17,10 +17,17 @@ r2profiles = [
 		"platform": "w64",
 		"source": "https://github.com/radareorg/radare2",
 		"needs": [ "git", "meson", "ninja" ]
+	},
+	{
+		"version": "5.2.1",
+		"platform": "unix",
+		"source": "https://github.com/radareorg/radare2",
+		"tag": "5.2.1",
+		"needs": [ "git", "meson", "ninja" ]
 	}
 ]
 
-def build_radare2(options):
+def build_radare2(profile):
 	envp = env_path()
 	srcdir=os.path.join(envp, "src")
 	gitdir=os.path.join(envp, "src", "radare2@git")
@@ -46,6 +53,9 @@ def build_radare2(options):
 	if rc != 0:
 		print("Clone failed")
 		return False
+	if profile.tag is not None:
+		print("Using TAG")
+		print("git reset --hard " + str(profile.tag))
 	print("Building ...")
 	print("tail -f "+logfil)
 	os.system("(cd " + srcdir + "/radare2; git clean -xdf; rm -rf shlr/capstone; ./configure --prefix="+dstdir+" 2>&1;make -j4 2>&1 && make install) > " + logfil)
@@ -59,8 +69,8 @@ class Radare2(r2env.Package):
 		"name": "radare2",
 		"profiles": r2profiles
 	}
-	def build(self, options):
+	def build(self, profile):
 		print("Building radare2")
-		build_radare2(options)
+		build_radare2(profile)
 		print("magic done")
 

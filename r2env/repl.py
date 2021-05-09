@@ -32,10 +32,9 @@ def enter_shell(r2path):
 	os.system(os.environ["SHELL"])
 	print("leave [.r2env/prefix] shell")
 
-def add_package(pkg):
+def add_package(pkg, profile):
 	print("Adding package")
-	options = []
-	pkg.build(options)
+	pkg.build(profile)
 	pkg.install()
 
 def run_action(e, action, args):
@@ -67,7 +66,7 @@ def run_action(e, action, args):
 			for profile in pkg.header["profiles"]:
 				namever = name + "@" + profile["version"]
 				if namever in args:
-					add_package(pkg)
+					add_package(pkg, profile)
 					return True
 		print("Cannot find pkg")
 	elif action == "use":
