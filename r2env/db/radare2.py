@@ -67,10 +67,12 @@ def build_radare2(profile):
 	try:
 		os.mkdir(logdir)
 	except: pass
+
 	if os.path.isdir(gitdir):
 		rc = os.system("cd '" + gitdir + "' && git reset --hard && git checkout master ; git reset --hard ; git pull")
 	else:
-		rc = os.system("git clone https://github.com/radareorg/radare2 '"+gitdir+"'")
+		giturl = profile["source"]
+		rc = os.system("git clone " + giturl + " '" + gitdir + "'")
 	if rc != 0:
 		print("Clone failed")
 		return False
@@ -78,7 +80,7 @@ def build_radare2(profile):
 		os.system("cd "+gitdir+" && git checkout " + str(profile["tag"]))
 	print("Building ...")
 	print("tail -f "+logfil)
-	use_meson = False
+	use_meson = profile["meson"]
 	if use_meson:
 		rc = os.system("(cd " + gitdir + " && git clean -xdf && rm -rf build && meson --buildtype=release --prefix="+prefix+" 2>&1 && ninja -C build && ninja -C build install DESTDIR="+dstdir+") > " + logfil)
 	else:

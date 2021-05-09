@@ -81,6 +81,10 @@ def run_action(e, action, args):
 		if renv is not None:
 			print(os.path.join(renv, "prefix", "bin"))
 	elif action == "rm":
+		envp = env_path()
+		if envp is None:
+			print("No r2env defined")
+			sys.exit(1)
 		for epkg in e.available_packages():
 			for profile in epkg.header["profiles"]:
 				name = epkg.header["name"]
@@ -90,13 +94,18 @@ def run_action(e, action, args):
 					return True
 		print("Cannot find pkg")
 	elif action == "add":
+		envp = env_path()
+		if envp is None:
+			print("No r2env defined")
+			sys.exit(1)
 		targets = autoversion(args)
-		## unstow the other versions
-		## remove dstdir? just keep it 'rm' can be used
-		## stow the new version
 		for pkg in e.available_packages():
 			name = pkg.header["name"]
 			for profile in pkg.header["profiles"]:
+				namever = name + "@" + profile["version"] + "#" + profile["platform"]
+				if namever in args:
+					add_package(pkg, profile)
+					return True
 				namever = name + "@" + profile["version"]
 				if namever in args:
 					add_package(pkg, profile)
@@ -114,16 +123,16 @@ def run_action(e, action, args):
 		for arg in args:
 			dstdir = os.path.join(envp, "dst", arg)
 			if os.path.isdir(dstdir):
-				print("D"+dstdir)
-				print("P"+prefix)
 				sauce = os.path.join(envp, "dst", arg, prefix[1:])
-				print("S"+sauce)
 				dploy.unstow([sauce], prefix)
 				dploy.stow(  [sauce], prefix)
 			else:
 				print("Cannot find " + dstdir)
 	elif action == "unuse":
 		envp = env_path()
+		if envp is None:
+			print("No r2env defined")
+			sys.exit(1)
 		prefix = os.path.join(envp, "prefix")
 		try:
 			os.mkdir(prefix)
