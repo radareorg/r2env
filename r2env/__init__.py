@@ -19,6 +19,9 @@ cfg = {
 class R2Env:
 	def __init__(self):
 		self.db = load_packages(cfg)
+	def init(self):
+		print(user_home())
+		os.mkdir(".r2env")
 	def du(self):
 		return "0KB"
 	def version(self):
