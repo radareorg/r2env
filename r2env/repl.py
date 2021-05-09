@@ -24,19 +24,24 @@ shell     - open a new shell with PATH env var set
 
 """
 
-def enter_shell(r2path):
+def enter_shell(r2path, args):
 	newpath = os.path.join(r2path, "prefix", "bin")
 	p = newpath + ":" + os.environ["PATH"]
-	print("enter [.r2env/prefix] shell")
+	if len(args) == 0:
+		print("enter [.r2env/prefix] shell")
 	# macos
 	os.environ["DYLD_LIBRARY_PATH"] = os.path.join(r2path, "prefix", "lib")
 	os.environ["LD_LIBRARY_PATH"] = os.path.join(r2path, "prefix", "lib")
 	os.environ["R2ENV_PATH"] = r2path
 	dlp = os.path.join(r2path, "prefix", "lib")
 	# os.system(os.environ["SHELL"])
-	print("export PATH='"+p+"';export DYLD_LIBRARY_PATH="+dlp+"; sh")
-	os.system("export PATH='"+p+"';DYLD_LIBRARY_PATH="+dlp+" sh")
-	print("leave [.r2env/prefix] shell")
+	if len(args) == 0:
+		os.system("export PATH='"+p+"';DYLD_LIBRARY_PATH="+dlp+" sh")
+		print("leave [.r2env/prefix] shell")
+	else:
+		cmd = (" ".join(args))
+		os.system("export PATH='"+p+"';DYLD_LIBRARY_PATH="+dlp+" " + cmd)
+		
 
 def add_package(pkg, profile):
 	print("Adding package")
@@ -101,10 +106,12 @@ def run_action(e, action, args):
 		for arg in args:
 			dstdir = os.path.join(envp, "dst", arg)
 			if os.path.isdir(dstdir):
-				print(dstdir)
-				print(prefix)
-				dploy.unstow([os.path.join(dstdir, prefix)], prefix)
-				dploy.stow([os.path.join(dstdir, prefix)], prefix)
+				print("D"+dstdir)
+				print("P"+prefix)
+				sauce = os.path.join(envp, "dst", arg, prefix[1:])
+				print("S"+sauce)
+				dploy.unstow([sauce], prefix)
+				dploy.stow(  [sauce], prefix)
 			else:
 				print("Cannot find " + dstdir)
 	elif action == "unuse":
@@ -124,7 +131,7 @@ def run_action(e, action, args):
 	elif action == "help":
 		print(help_message)
 	elif action == "shell":
-		enter_shell(env_path())
+		enter_shell(env_path(), args)
 	elif action == "host":
 		print(host_platform())
 	elif action == "version":
