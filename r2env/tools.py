@@ -6,6 +6,8 @@ import sys
 def host_platform():
 	if os.name == "nt":
 		return "w64"
+	if os.file.exists("/default.prop"):
+		return "android"
 	return "unix"
 
 def user_home():

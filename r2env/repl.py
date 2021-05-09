@@ -31,6 +31,7 @@ def enter_shell(r2path):
 	# macos
 	os.environ["DYLD_LIBRARY_PATH"] = os.path.join(r2path, "prefix", "lib")
 	os.environ["LD_LIBRARY_PATH"] = os.path.join(r2path, "prefix", "lib")
+	os.environ["R2ENV_PATH"] = r2path
 	dlp = os.path.join(r2path, "prefix", "lib")
 	# os.system(os.environ["SHELL"])
 	print("export PATH='"+p+"';export DYLD_LIBRARY_PATH="+dlp+"; sh")
@@ -102,9 +103,8 @@ def run_action(e, action, args):
 			if os.path.isdir(dstdir):
 				print(dstdir)
 				print(prefix)
-				os.system("dploy unstow '" + dstdir + "/"+prefix+"' " + prefix)
-				os.system("dploy stow '" + dstdir + "/"+prefix+"' "+prefix)
-				# dploy.stow(dstdir, prefix)
+				dploy.unstow([os.path.join(dstdir, prefix)], prefix)
+				dploy.stow([os.path.join(dstdir, prefix)], prefix)
 			else:
 				print("Cannot find " + dstdir)
 	elif action == "unuse":
@@ -118,8 +118,7 @@ def run_action(e, action, args):
 			if os.path.isdir(dstdir):
 				print(dstdir)
 				print(prefix)
-				os.system("dploy unstow '" + dstdir + "' '" + prefix + "'")
-				# dploy.stow(dstdir, prefix)
+				dploy.unstow([dstdir], prefix)
 			else:
 				print("Cannot find " + dstdir)
 	elif action == "help":
