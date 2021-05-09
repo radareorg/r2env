@@ -1,6 +1,8 @@
 r2env
 =====
 
+[![CI](https://github.com/radareorg/r2env/actions/workflows/ci.yml/badge.svg)](https://github.com/radareorg/r2env/actions/workflows/ci.yml)
+
 This repository contains the tool available via pip to install
 and manage multiple versions of radare2 and its plugins.
 
