@@ -26,6 +26,12 @@ r2profiles = [
 		"needs": [ "git", "make", "patch" ]
 	},
 	{
+		"version": "5.2.1",
+		"platform": "macos",
+		"binary": "https://github.com/radareorg/radare2/releases/download/5.2.1/radare2-5.2.1.pkg",
+		# TODO: add checksum here
+	},
+	{
 		"version": "5.1.0",
 		"platform": "unix",
 		"source": "https://github.com/radareorg/radare2",

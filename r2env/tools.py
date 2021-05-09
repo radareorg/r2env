@@ -3,6 +3,15 @@ import sys
 
 # Detect git, meson, ninja, patch, unzip make, gcc, ...
 
+def autoversion(args):
+	res = []
+	for arg in args:
+		if arg.find("@") == -1:
+			res.append(arg + "@git")
+		else:
+			res.append(arg)
+	return res
+
 def host_platform():
 	if os.name == "nt":
 		return "w64"

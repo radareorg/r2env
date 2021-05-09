@@ -3,6 +3,7 @@ from r2env.tools import host_platform
 from r2env.tools import user_home
 from r2env.tools import env_path
 from r2env.tools import get_size
+from r2env.tools import autoversion
 from r2env.tools import slurp
 import r2env
 import dploy
@@ -54,19 +55,25 @@ def del_package(pkg, profile):
 
 def run_action(e, action, args):
 	if action == "list":
-		print("## Installed:")
-		for pkg in e.installed_packages():
-			pkgdir = os.path.join(env_path(), "dst", pkg)
-			gitdir = os.path.join(env_path(), "src", pkg)
-			ts = slurp(os.path.join(pkgdir, ".timestamp.txt"))
-			sz = str(int(get_size(pkgdir) / (1024 * 1024)))
-			sz2 = str(int(get_size(gitdir) / (1024 * 1024))) + " MB"
-			padpkg = pkg.ljust(16);
-			padsz = str(sz + " / " + sz2).ljust(16);
-			print(padpkg + "  |  " + padsz + "  |  " + ts)
-		print("## Available:")
-		for pkg in e.available_packages():
-			print(pkg.tostring())
+		arg = args[0] if len(args) > 0 else ""
+		if arg == "":
+			print("-- Installed:")
+		if arg.find("i") != -1 or arg == "":
+			for pkg in e.installed_packages():
+				pkgdir = os.path.join(env_path(), "dst", pkg)
+				gitdir = os.path.join(env_path(), "src", pkg)
+				ts = slurp(os.path.join(pkgdir, ".timestamp.txt"))
+				sz = str(int(get_size(pkgdir) / (1024 * 1024)))
+				sz2 = str(int(get_size(gitdir) / (1024 * 1024))) + " MB"
+				padpkg = pkg.ljust(16);
+				padsz = str(sz + " / " + sz2).ljust(16);
+				print(padpkg + "  |  " + padsz + "  |  " + ts)
+		if arg == "":
+			print("")
+			print("-- Available:")
+		if arg.find("a") != -1 or arg == "":
+			for pkg in e.available_packages():
+				print(pkg.tostring())
 	elif action == "init":
 		e.init()
 	elif action == "path":
@@ -83,6 +90,7 @@ def run_action(e, action, args):
 					return True
 		print("Cannot find pkg")
 	elif action == "add":
+		targets = autoversion(args)
 		## unstow the other versions
 		## remove dstdir? just keep it 'rm' can be used
 		## stow the new version
