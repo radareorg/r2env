@@ -32,7 +32,7 @@ def env_path():
 		if oldcwd == cwd:
 			return None
 		oldcwd = cwd
-	
+	print("Run 'r2env init' first")
 	# walk directories up
 	return None
 

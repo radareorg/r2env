@@ -1,3 +1,5 @@
+from r2env.tools import git_clone
+
 def do_link(self):
 	print("Linking")
 	print(self.name())
@@ -6,7 +8,8 @@ def do_unlink(self):
 	print("Unlinking")
 
 def fetch_package(self):
-	tools.git_clone("https://github.com/radareorg/r0")
+	print("Fetch")
+	git_clone("https://github.com/radareorg/r0")
 
 class Package:
 	def __init__(self, cfg):
@@ -16,11 +19,11 @@ class Package:
 	def platform(self):
 		return ""
 	def fetch(self):
-		fetch_package(self)
+		# do nothing
+		return ""
 	def install(self):
-		self.fetch()
-		self.build()
-		self.install()
+		# do nothing
+		return ""
 	def tostring(self):
 		pkgname = self.header["name"]
 		res = []

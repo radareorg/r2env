@@ -23,15 +23,30 @@ r2profiles = [
 		"platform": "unix",
 		"source": "https://github.com/radareorg/radare2",
 		"tag": "5.2.1",
-		"needs": [ "git", "meson", "ninja" ]
+		"needs": [ "git", "make", "patch" ]
+	},
+	{
+		"version": "5.1.0",
+		"platform": "unix",
+		"source": "https://github.com/radareorg/radare2",
+		"tag": "5.1.0",
+		"needs": [ "git", "make", "patch" ]
+	},
+	{
+		"version": "5.0.0",
+		"platform": "unix",
+		"source": "https://github.com/radareorg/radare2",
+		"tag": "5.0.0",
+		"needs": [ "git", "make", "patch" ]
 	}
 ]
 
 def build_radare2(profile):
+	pkgver="radare2" + "@" + profile["version"]
 	envp = env_path()
 	srcdir=os.path.join(envp, "src")
-	gitdir=os.path.join(envp, "src", "radare2@git")
-	dstdir=os.path.join(envp, "dst", "radare2@git")
+	gitdir=os.path.join(envp, "src", pkgver)
+	dstdir=os.path.join(envp, "dst", pkgver)
 	logdir=os.path.join(envp, "log")
 	logfil=os.path.join(logdir, "radare2.txt")
 	prefix=os.path.join(envp, "prefix")
@@ -47,22 +62,29 @@ def build_radare2(profile):
 		os.mkdir(logdir)
 	except: pass
 	if os.path.isdir(gitdir):
-		rc = os.system("cd '" + gitdir + "' && git reset --hard; git pull")
+		rc = os.system("cd '" + gitdir + "' && git reset --hard && git checkout master ; git reset --hard ; git pull")
 	else:
-		rc = os.system("cd " + srcdir + ";git clone --depth=1 https://github.com/radareorg/radare2 'radare2@git'")
+		rc = os.system("git clone https://github.com/radareorg/radare2 '"+gitdir+"'")
 	if rc != 0:
 		print("Clone failed")
 		return False
-	if profile.tag is not None:
-		print("Using TAG")
-		print("git reset --hard " + str(profile.tag))
+	if "tag" in profile:
+		os.system("cd "+gitdir+" && git checkout " + str(profile["tag"]))
 	print("Building ...")
 	print("tail -f "+logfil)
-	os.system("(cd " + srcdir + "/radare2; git clean -xdf; rm -rf shlr/capstone; ./configure --prefix="+dstdir+" 2>&1;make -j4 2>&1 && make install) > " + logfil)
-	# clone radare2 in srcdir
-	os.system("date > "+dstdir+"/.timestamp.txt")
-	os.system("git log |head -n1> "+dstdir+"/.commit.txt")
-	
+	use_meson = False
+	if use_meson:
+		rc = os.system("(cd " + gitdir + " && git clean -xdf && rm -rf build && meson --buildtype=release --prefix="+prefix+" 2>&1 && ninja -C build && ninja -C build install DESTDIR="+dstdir+") > " + logfil)
+	else:
+		#rc = os.system("(cd " + gitdir + " && git clean -xdf && rm -rf shlr/capstone; ./configure --with-rpath --prefix="+dstdir+" 2>&1 && make -j4 2>&1 && make install DESTDIR="+dstdir+") > " + logfil)
+		rc = os.system("(cd " + gitdir + " && git clean -xdf && rm -rf shlr/capstone; ./configure --prefix="+dstdir+" 2>&1 && make -j4 2>&1 && make install DESTDIR="+dstdir+") > " + logfil)
+	if rc == 0:
+		# clone radare2 in srcdir
+		os.system("date > "+dstdir+"/.timestamp.txt")
+		os.system("git log |head -n1> "+dstdir+"/.commit.txt")
+	else:
+		print("Build failed")
+		sys.exit(1)
 
 class Radare2(r2env.Package):
 	header = {

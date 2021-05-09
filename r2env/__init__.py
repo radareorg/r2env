@@ -6,8 +6,10 @@ import os
 
 def load_packages(cfg):
 	from r2env.db import Radare2
+	from r2env.db import R0
 	pkgs = []
 	pkgs.append(Radare2(cfg))
+	pkgs.append(R0(cfg))
 	return pkgs
 
 cfg = {
@@ -29,3 +31,5 @@ class R2Env:
 		return self.db
 	def installed_packages(self):
 		return ipdb.list()
+	def clean_package(self, pkgname):
+		return ipdb.clean(pkgname)

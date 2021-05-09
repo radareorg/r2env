@@ -25,11 +25,16 @@ shell     - open a new shell with PATH env var set
 """
 
 def enter_shell(r2path):
-	sys.path.insert(0, r2path + "/prefix/bin")
-	#newpath = r2path + "/prefix/bin:" + os.environ["PATH"]
-	#os.environ["PATH"] = newpath
+	newpath = os.path.join(r2path, "prefix", "bin")
+	p = newpath + ":" + os.environ["PATH"]
 	print("enter [.r2env/prefix] shell")
-	os.system(os.environ["SHELL"])
+	# macos
+	os.environ["DYLD_LIBRARY_PATH"] = os.path.join(r2path, "prefix", "lib")
+	os.environ["LD_LIBRARY_PATH"] = os.path.join(r2path, "prefix", "lib")
+	dlp = os.path.join(r2path, "prefix", "lib")
+	# os.system(os.environ["SHELL"])
+	print("export PATH='"+p+"';export DYLD_LIBRARY_PATH="+dlp+"; sh")
+	os.system("export PATH='"+p+"';DYLD_LIBRARY_PATH="+dlp+" sh")
 	print("leave [.r2env/prefix] shell")
 
 def add_package(pkg, profile):
@@ -37,32 +42,46 @@ def add_package(pkg, profile):
 	pkg.build(profile)
 	pkg.install()
 
+def del_package(pkg, profile):
+	print("Deleting package")
+	pkg.clean(profile)
+
 def run_action(e, action, args):
 	if action == "list":
 		print("## Installed:")
 		for pkg in e.installed_packages():
 			pkgdir = os.path.join(env_path(), "dst", pkg)
+			gitdir = os.path.join(env_path(), "src", pkg)
 			ts = slurp(os.path.join(pkgdir, ".timestamp.txt"))
-			sz = str(int(get_size(pkgdir) / (1024 * 1024))) + " MB"
-			print(pkg + "  |  " + sz + "  |  " + ts)
+			sz = str(int(get_size(pkgdir) / (1024 * 1024)))
+			sz2 = str(int(get_size(gitdir) / (1024 * 1024))) + " MB"
+			padpkg = pkg.ljust(16);
+			padsz = str(sz + " / " + sz2).ljust(16);
+			print(padpkg + "  |  " + padsz + "  |  " + ts)
 		print("## Available:")
 		for pkg in e.available_packages():
 			print(pkg.tostring())
 	elif action == "init":
 		e.init()
 	elif action == "path":
-		print("home " + user_home())
-		print("cwdp " + os.getcwd())
 		renv = env_path()
 		if renv is not None:
-			print("renv " + renv)
-			print("path " + renv + "/bin")
+			print(os.path.join(renv, "prefix", "bin"))
+	elif action == "rm":
+		for epkg in e.available_packages():
+			for profile in epkg.header["profiles"]:
+				name = epkg.header["name"]
+				namever = name + "@" + profile["version"]
+				if namever in args:
+					del_package(epkg, profile)
+					return True
+		print("Cannot find pkg")
 	elif action == "add":
+		## unstow the other versions
+		## remove dstdir? just keep it 'rm' can be used
+		## stow the new version
 		for pkg in e.available_packages():
 			name = pkg.header["name"]
-			if name in args:
-				add_package(pkg)
-				return True
 			for profile in pkg.header["profiles"]:
 				namever = name + "@" + profile["version"]
 				if namever in args:
@@ -80,10 +99,28 @@ def run_action(e, action, args):
 			if os.path.isdir(dstdir):
 				print(dstdir)
 				print(prefix)
-				os.system("dploy stow '" + dstdir + "' '" + prefix + "'")
+				os.system("dploy unstow '" + dstdir + "/"+prefix+"' " + prefix)
+				os.system("dploy stow '" + dstdir + "/"+prefix+"' "+prefix)
 				# dploy.stow(dstdir, prefix)
 			else:
 				print("Cannot find " + dstdir)
+	elif action == "unuse":
+		envp = env_path()
+		prefix = os.path.join(envp, "prefix")
+		try:
+			os.mkdir(prefix)
+		except: pass
+		for arg in args:
+			dstdir = os.path.join(envp, "dst", arg)
+			if os.path.isdir(dstdir):
+				print(dstdir)
+				print(prefix)
+				os.system("dploy unstow '" + dstdir + "' '" + prefix + "'")
+				# dploy.stow(dstdir, prefix)
+			else:
+				print("Cannot find " + dstdir)
+	elif action == "help":
+		print(help_message)
 	elif action == "shell":
 		enter_shell(env_path())
 	elif action == "host":
