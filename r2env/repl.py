@@ -58,7 +58,7 @@ def cb_use(sauce, prefix):
 	dploy.stow(  [sauce], prefix)
 
 def cb_unuse(sauce, prefix):
-	dploy.unstow([dstdir], prefix)
+	dploy.unstow([sauce], prefix)
 
 def match_dst(args, cb):
 	ret = False
