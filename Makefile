@@ -1,6 +1,16 @@
+PYTHON?=python3
+
 all:
-	python3 setup.py build
-	sudo python3 setup.py install
+	$(PYTHON) setup.py build
+	$(MAKE) install
 
 pub:
 	twine upload --repository-url https://upload.pypi.org/legacy/ --verbose dist/*
+
+install:
+	sudo $(PYTHON) setup.py install
+
+uninstall:
+	yes | sudo pip uninstall r2env
+
+.PHONY: all pub install uninstall
