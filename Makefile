@@ -4,6 +4,9 @@ all:
 	$(PYTHON) setup.py build
 	$(MAKE) install
 
+clean:
+	sudo rm -rf dist r2env.egg-info
+
 pub:
 	twine upload --repository-url https://upload.pypi.org/legacy/ --verbose dist/*
 
@@ -13,4 +16,4 @@ install:
 uninstall:
 	yes | sudo pip uninstall r2env
 
-.PHONY: all pub install uninstall
+.PHONY: all clean pub install uninstall
