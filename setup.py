@@ -19,7 +19,6 @@ setup(
     keywords="reversing radare2 package version installation",
     classifiers=[
         "Environment :: Console",
-        "Environment :: Linux",
         "Environment :: MacOS X",
         "Environment :: Win32 (MS Windows)",
         "License :: OSI Approved",
