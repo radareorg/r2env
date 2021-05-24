@@ -18,12 +18,10 @@ setup(
     zip_safe=True,
     keywords="reversing radare2 package version installation",
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
+        "Environment :: Linux",
         "Environment :: MacOS X",
         "Environment :: Win32 (MS Windows)",
-        "Intended Audience :: Developers",
-        "Intended Audience :: Science/Research",
         "License :: OSI Approved",
         "Natural Language :: English",
         "Operating System :: MacOS :: MacOS X",
@@ -35,8 +33,6 @@ setup(
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
-        "Programming Language :: JavaScript",
-        "Topic :: Software Development :: Debuggers",
         "Topic :: Software Development :: Libraries :: Python Modules"
     ],
     packages=['r2env', 'r2env.db'],
