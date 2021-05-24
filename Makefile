@@ -6,7 +6,7 @@ all:
 	$(MAKE) install
 
 clean:
-	sudo rm -rf dist r2env.egg-info
+	sudo rm -rf dist r2env.egg-info build
 
 pub:
 	twine upload --repository-url https://upload.pypi.org/legacy/ --verbose dist/*
