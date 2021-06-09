@@ -1,2 +1,0 @@
-#!/bin/sh
-PYTHONPATH=$PWD python3 -c 'import r2env;r2env.main()' $@

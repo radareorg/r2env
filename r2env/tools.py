@@ -1,77 +1,65 @@
+# -*- coding: utf-8 -*-
+
 import os
-import sys
+from colorama import Fore, Style
+from git import Repo
+from shutil import which
+import json
 
-# Detect git, meson, ninja, patch, unzip make, gcc, ...
 
-def autoversion(args):
-	res = []
-	for arg in args:
-		if arg.find("@") == -1:
-			res.append(arg + "@git")
-		else:
-			res.append(arg)
-	return res
+# Global Vars
+INFO = 0
+WARNING = 1
+ERROR = 2
+
+
+def print_console(msg, level=INFO, formatter=0):
+    tabs, color = ["", ""]
+    for i in range(formatter):
+        tabs += "    "
+    if level == ERROR:
+        color = Fore.RED
+    elif level == WARNING:
+        color = Fore.YELLOW
+    print(color + tabs + msg + Style.RESET_ALL)
+
 
 def host_platform():
-	if os.name == "nt":
-		return "w64"
-	if os.file.exists("/default.prop"):
-		return "android"
-	return "unix"
+    if os.name == "nt":
+        return "w64"
+    if os.file.exists("/default.prop"):
+        return "android"
+    return "unix"
 
-def user_home():
-	if int(sys.version[0]) < 3:
-		return os.environ['HOME']
-	from pathlib import Path
-	return str(Path.home())
 
-def slurp(f):
-	try:
-		f = open(f,"r")
-		return str(f.read()).strip()
-	except:
-		return ""
+def git_fetch(url, version, dst_dir):
+    if os.path.isdir(dst_dir):
+        repo = Repo(dst_dir)
+        repo.remotes.origin.pull("master")
+    else:
+        repo = Repo.clone_from(url, dst_dir)
+    if version != "latest":
+        repo.git.checkout(version)
+    return
 
-def env_path():
-	oldcwd = os.getcwd()
-	while True:
-		envdir = os.path.join(oldcwd, ".r2env")
-		if os.path.isdir(envdir):
-			return envdir
-		os.chdir("..")
-		cwd = os.getcwd()
-		if oldcwd == cwd:
-			return None
-		oldcwd = cwd
-	print("Run 'r2env init' first")
-	# walk directories up
-	return None
 
-def git_clone(url):
-	os.system("git clone " + url + " " + dstdir)
+def exists(tool):
+    return which(tool) is not None
 
-# XXX this is not going to work on windows
-def check_tool(tool):
-	if tool == "git":
-		return os.system("git --help > /dev/null") == 0
-	elif tool == "unzip":
-		return os.system("unzip -h > /dev/null") == 0
-	return False
 
-def check(tools):
-	for tool in tools:
-		found = check_tool(tool)
-		if found:
-			print("found " + tool)
-		else:
-			print("oops  " + tool)
+def check_if_exists(tools):
+    res = True
+    for tool in tools:
+        found = exists(tool)
+        if not found:
+            print_console("[x] {} is not installed and is required.", ERROR)
+            res = False
+    return res
 
-def get_size(start_path = '.'):
-	total_size = 0
-	for dirpath, dirnames, filenames in os.walk(start_path):
-		for f in filenames:
-			fp = os.path.join(dirpath, f)
-			# skip if it is symbolic link
-			if not os.path.islink(fp):
-				total_size += os.path.getsize(fp)
-	return total_size
+def load_json_file(filepath):
+    try:
+        with open(filepath) as json_file:
+            return json.load(json_file)
+    except Exception as err:
+        print_console("File {} not found. Msg: {}".format(filepath, err), ERROR)
+        return None

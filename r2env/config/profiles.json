@@ -1,0 +1,17 @@
+{
+  "radare0": {
+    "source": "https://github.com/radareorg/r0",
+    "versions": [
+      "latest"
+    ]
+  },
+  "radare2": {
+    "source": "https://github.com/radareorg/radare2",
+    "versions": [
+      "5.0.0",
+      "5.1.0",
+      "5.2.1",
+      "latest"
+    ]
+  }
+}
