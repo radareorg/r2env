@@ -45,7 +45,7 @@ def build_radare2(profile):
     use_meson = profile["meson"]
     if use_meson:
         rc = os.system(
-            "(cd " + gitdir + " && git clean -xdf && rm -rf build && meson --buildtype=release --prefix=" + prefix + " 2>&1 && ninja -C build && ninja -C build install DESTDIR=" + dstdir + ") > " + logfil)
+            "(cd " + gitdir + " && git clean -xdf && rm -rf build && meson --buildtype=release local=true --prefix=" + prefix + " 2>&1 && ninja -C build && ninja -C build install) > " + logfil)
     else:
         # rc = os.system("(cd " + gitdir + " && git clean -xdf && rm -rf shlr/capstone; ./configure --with-rpath --prefix="+dstdir+" 2>&1 && make -j4 2>&1 && make install DESTDIR="+dstdir+") > " + logfil)
         rc = os.system(
