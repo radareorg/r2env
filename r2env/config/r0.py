@@ -31,7 +31,7 @@ def build_r0(profile):
     except Exception:
         pass
     if os.path.isdir(gitdir):
-        rc = os.system("cd '" + gitdir + "' && git reset --hard ; git checkout master ; git reset --hard && git pull")
+        rc = os.system("cd '" + gitdir + "' && git reset --hard ; git checkout master ; git pull")
     else:
         rc = os.system("git clone https://github.com/radareorg/r0 '" + gitdir + "'")
     if rc != 0:
