@@ -5,7 +5,7 @@ import shutil
 import sys
 import time
 
-from tools import load_json_file, git_fetch, print_console, ERROR, exit_if_not_exists
+from tools import load_json_file, git_fetch, git_clean, print_console, ERROR, exit_if_not_exists
 
 
 class PackageManager:
@@ -38,7 +38,7 @@ class PackageManager:
             sys.exit(-1)
         return profiles
 
-    def install_package(self, profile, version):
+    def install_package(self, profile, version, use_meson):
         logfile = os.path.join(self._r2env_path, self.LOG_DIR, "{}_{}_{}_build.txt".format(
             profile, version, round(time.monotonic() * 1000)))
         source_path = os.path.join(os.path.join(self._r2env_path, self.SOURCE_DIR, profile))
@@ -47,11 +47,8 @@ class PackageManager:
             os.makedirs(source_path)
         if not os.path.isdir(dst_dir):
             os.makedirs(dst_dir)
-        if version not in self._packages[profile]["versions"]:
-            print_console("{}@{} package not available. Use 'list' command to see available packages."
-                          .format(profile, version), level=ERROR)
-            return
-        if self._build_from_source(profile, version, source_path, dst_dir, logfile):
+        self._exit_if_package_not_available(profile, version)
+        if self._build_from_source(profile, version, source_path, dst_dir, logfile, use_meson=use_meson):
             print_console("[*] Package {}@{} installed successfully".format(profile, version))
         else:
             print_console("[x] Something wrong happened during the build process. Check {} for more information.".format
@@ -76,23 +73,41 @@ class PackageManager:
     def _build_from_package(self):
         pass
 
-    def _build_from_source(self, profile, version, source_path, dst_path, logfile):
+    def _build_from_source(self, profile, version, source_path, dst_path, logfile, use_meson=False):
         exit_if_not_exists(['git'])
-        print_console("[-] Downloading {}@{} package".format(profile, version))
+        print_console("[*] Installing {}@{} package from source".format(profile, version))
+        print_console("[-] Cloning {} version".format(version))
         git_fetch(self._packages[profile]["source"], version, source_path)
-        print_console("[-] Building package ...")
-        return self._build_from_acr(source_path, dst_path, logfile)
+        print_console("[-] Cleaning Repo".format(version))
+        git_clean(source_path)
+        if use_meson:
+            return self._build_using_meson(source_path, dst_path, logfile)
+        else:
+            return self._build_using_acr(source_path, dst_path, logfile)
 
-    def _build_from_acr(self, source_path, dst_path, logfile):
+    def _build_using_acr(self, source_path, dst_path, logfile):
         """Only works in Unix systems"""
         exit_if_not_exists(['make'])
+        print_console("[-] Building package using acr ...")
         cmd = "(cd {0} && rm -rf shlr/capstone && ./configure --with-rpath --prefix={1} 2>&1 && make -j4 2>&1 && make install) > {2}".format(
             source_path, dst_path, logfile)
         return os.system(cmd) == 0
 
     def _build_using_meson(self, source_path, dst_path, logfile):
         exit_if_not_exists(['meson', 'ninja'])
-        cmd = "(cd {0} && rm -rf build && meson --buildtype=release local=true --prefix={1} 2>&1 && ninja -C build && ninja -C build install) > {2}".format(
+        print_console("[-] Building package using meson ...")
+        cmd = "(cd {0} && rm -rf build && meson --buildtype=release --prefix={1} build 2>&1 && ninja -C build && ninja -C build install) > {2}".format(
             source_path, dst_path, logfile
         )
         return os.system(cmd) == 0
+
+    def _exit_if_package_not_available(self, profile, version):
+        pkg_found = False
+        for available_version in self._packages[profile]["versions"]:
+            if available_version['id'] == version:
+                pkg_found = True
+                break
+        if not pkg_found:
+            print_console("{}@{} package not available. Use 'list' command to see available packages."
+                          .format(profile, version), level=ERROR)
+            sys.exit(-1)

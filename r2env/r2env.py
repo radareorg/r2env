@@ -43,12 +43,12 @@ class R2Env:
         for pkg in self._package_manager.list_installed_packages():
             print_console("  - {}".format(pkg))
 
-    def install(self, package):
+    def install(self, package, use_meson=False):
         if not self._check_package_format(package):
             print_console("[x] Invalid Package format.", level=ERROR)
             return
         profile, version = package.split('@')
-        self._package_manager.install_package(profile, version)
+        self._package_manager.install_package(profile, version, use_meson=use_meson)
 
     def uninstall(self, package):
         if not self._check_package_format(package):
@@ -82,5 +82,5 @@ class R2Env:
 
     @staticmethod
     def _check_package_format(package):
-        p = re.compile("\w+\d@\d\.\d\.\d")
+        p = re.compile("\w+\d@[\d\.\d\.\d,'latest']")
         return p.match(package)

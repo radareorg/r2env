@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 import argparse
-from tools import print_console, ERROR
+from tools import print_console, WARNING, ERROR
 import r2env
 
 
@@ -24,7 +24,7 @@ shell              - open a new shell with PATH env var set
 """
 
 
-def run_action(r2e, action, args):
+def run_action(r2e, action, args, use_meson):
     if action == "init":
         r2e.init()
     elif action == "version":
@@ -39,19 +39,22 @@ def run_action(r2e, action, args):
         if len(args) < 1:
             print_console("[x] Missing package argument.", ERROR)
             return
-        r2e.install(args[0])
+        r2e.install(args[0], use_meson=use_meson)
     elif action == "uninstall":
         if len(args) < 1:
             print_console("[x] Missing package argument.", ERROR)
             return
         r2e.uninstall(args[0])
     elif action == "use":
+        print_console("WIP Command. Stay tunned ;)", WARNING)
         pass
     elif action == "exec":
+        print_console("WIP Command. Stay tunned ;)", WARNING)
         pass
     elif action == "versions":
         r2e.list_installed_packages()
     elif action == "shell":
+        print_console("WIP Command. Stay tunned ;)", WARNING)
         # r2e.enter_shell(args)
         pass
     elif action == "help":
@@ -65,14 +68,15 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("action", help="run specified action. (Run r2env help for more information)",
                         action="store", default=["help"])
-    parser.add_argument('args', metavar='args', nargs='*', type=str, help='specified arguments', default="")
-    parser.add_argument("-v", "--version", help="show r2env version", action="store_true")
+    parser.add_argument('args', metavar='args', nargs='*', type=str, help='Specified arguments')
+    parser.add_argument("-v", "--version", help="Show r2env version", action="store_true")
+    parser.add_argument("-m", "--meson", help="Use meson as your build system.", action="store_true")
     args = parser.parse_args()
     r2e = r2env.R2Env()
     if args.version:
         print_console(r2e.version())
         return
-    run_action(r2e, args.action, args.args)
+    run_action(r2e, args.action, args.args, args.meson)
 
 
 if __name__ == "__main__":

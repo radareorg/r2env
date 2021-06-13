@@ -34,15 +34,19 @@ def host_platform():
     return "unix"
 
 
-def git_fetch(url, version, dst_dir):
-    if os.path.isdir(dst_dir):
-        repo = Repo(dst_dir)
+def git_fetch(url, version, source_path):
+    if os.path.isdir(os.path.join(source_path, ".git")):
+        repo = Repo(source_path)
         repo.remotes.origin.pull("master")
     else:
-        repo = Repo.clone_from(url, dst_dir)
+        repo = Repo.clone_from(url, source_path)
     if version != "latest":
         repo.git.checkout(version)
-    return
+
+
+def git_clean(source_path):
+    repo = Repo(source_path)
+    repo.git.clean('-xdf')
 
 
 def exists(tool):
