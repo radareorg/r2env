@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 import argparse
-from tools import env_path, print_console, ERROR
+from tools import print_console, ERROR
 import r2env
 
 
@@ -41,7 +41,10 @@ def run_action(r2e, action, args):
             return
         r2e.install(args[0])
     elif action == "uninstall":
-        pass
+        if len(args) < 1:
+            print_console("[x] Missing package argument.", ERROR)
+            return
+        r2e.uninstall(args[0])
     elif action == "use":
         pass
     elif action == "exec":
@@ -49,7 +52,8 @@ def run_action(r2e, action, args):
     elif action == "versions":
         r2e.list_installed_packages()
     elif action == "shell":
-        r2e.enter_shell(env_path(), args)
+        # r2e.enter_shell(args)
+        pass
     elif action == "help":
         print_console(help_message)
     else:

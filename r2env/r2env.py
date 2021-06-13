@@ -36,7 +36,7 @@ class R2Env:
         for profile in packages:
             print_console("  - {} packages:".format(profile), WARNING)
             for version in packages[profile]['versions']:
-                print_console(" {}@{}".format(profile, version), formatter=1)
+                print_console(" {}@{}".format(profile, version['id']), formatter=1)
 
     def list_installed_packages(self):
         print_console("[*] Installed Radare packages")

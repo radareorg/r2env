@@ -55,6 +55,7 @@ def exit_if_not_exists(tools):
             print_console("[x] {} is required. Please install it first", level=ERROR)
             sys.exit(-1)
 
+
 def load_json_file(filepath):
     try:
         with open(filepath) as json_file:

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import shutil
 import sys
 import time
 
@@ -50,22 +51,39 @@ class PackageManager:
             print_console("{}@{} package not available. Use 'list' command to see available packages."
                           .format(profile, version), level=ERROR)
             return
-        exit_if_not_exists(['git'])
-        print_console("[-] Downloading {}@{} package".format(profile, version))
-        git_fetch(self._packages[profile]["source"], version, source_path)
-        print_console("[-] Building package ...")
-        success = self._build_from_source(source_path, dst_dir, logfile)
-        if success:
+        if self._build_from_source(profile, version, source_path, dst_dir, logfile):
             print_console("[*] Package {}@{} installed successfully".format(profile, version))
         else:
             print_console("[x] Something wrong happened during the build process. Check {} for more information.".format
                           (logfile), level=ERROR)
-            return
 
-    def uninstall_package(self):
+    def uninstall_package(self, package_name):
+        pkg_found = False
+        for package in self.list_installed_packages():
+            if package_name == package:
+                pkg_found = True
+                pkg_dir = os.path.join(os.path.join(self._r2env_path, self.PACKAGES_DIR), package_name)
+                try:
+                    shutil.rmtree(pkg_dir)
+                    print_console("Removed package {}".format(package_name))
+                except Exception as err:
+                    print_console("[x] Unable to remove package {0}. Error: {1}".format(package_name, err), ERROR)
+                finally:
+                    break
+        if not pkg_found:
+            print_console("[x] Unable to find installed package {0}".format(package_name), ERROR)
+
+    def _build_from_package(self):
         pass
 
-    def _build_from_source(self, source_path, dst_path, logfile):
+    def _build_from_source(self, profile, version, source_path, dst_path, logfile):
+        exit_if_not_exists(['git'])
+        print_console("[-] Downloading {}@{} package".format(profile, version))
+        git_fetch(self._packages[profile]["source"], version, source_path)
+        print_console("[-] Building package ...")
+        return self._build_from_acr(source_path, dst_path, logfile)
+
+    def _build_from_acr(self, source_path, dst_path, logfile):
         """Only works in Unix systems"""
         exit_if_not_exists(['make'])
         cmd = "(cd {0} && rm -rf shlr/capstone && ./configure --with-rpath --prefix={1} 2>&1 && make -j4 2>&1 && make install) > {2}".format(
