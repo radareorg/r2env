@@ -49,7 +49,7 @@ def build_radare2(profile):
     else:
         # rc = os.system("(cd " + gitdir + " && git clean -xdf && rm -rf shlr/capstone; ./configure --with-rpath --prefix="+dstdir+" 2>&1 && make -j4 2>&1 && make install DESTDIR="+dstdir+") > " + logfil)
         rc = os.system(
-            "(cd " + gitdir + " && git clean -xdf && rm -rf shlr/capstone; ./configure --prefix=" + dstdir + " 2>&1 && make -j4 2>&1 && make install DESTDIR=" + dstdir + ") > " + logfil)
+            "(cd " + gitdir + " && git clean -xdf && rm -rf shlr/capstone; ./configure --with-rpath --prefix=" + dstdir + " 2>&1 && make -j4 2>&1 && make install) > " + logfil)
     if rc == 0:
         # clone radare2 in srcdir
         os.system("date > " + dstdir + "/.timestamp.txt")
