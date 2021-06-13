@@ -35,7 +35,7 @@ def build_r0(profile):
     else:
         rc = os.system("git clone https://github.com/radareorg/r0 '" + gitdir + "'")
     if rc != 0:
-        print("Clone failed")
+        print("Clone or pull failed")
         return False
     if "tag" in profile:
         os.system("git checkout " + str(profile["tag"]))
