@@ -50,9 +50,11 @@ class R2Env:
         profile, version = package.split('@')
         self._package_manager.install_package(profile, version)
 
-    def uninstall(self):
-        # TODO
-        pass
+    def uninstall(self, package):
+        if not self._check_package_format(package):
+            print_console("[x] Invalid Package format.", level=ERROR)
+            return
+        self._package_manager.uninstall_package(package)
 
     def use(self):
         # TODO

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
+
 from colorama import Fore, Style
 from git import Repo
 from shutil import which
@@ -47,14 +49,11 @@ def exists(tool):
     return which(tool) is not None
 
 
-def check_if_exists(tools):
-    res = True
+def exit_if_not_exists(tools):
     for tool in tools:
-        found = exists(tool)
-        if not found:
-            print_console("[x] {} is not installed and is required.", ERROR)
-            res = False
-    return res
+        if not exists(tool):
+            print_console("[x] {} is required. Please install it first", level=ERROR)
+            sys.exit(-1)
 
 def load_json_file(filepath):
     try:
