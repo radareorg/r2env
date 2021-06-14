@@ -18,6 +18,9 @@ class PackageManager:
         self._packages = self._load_profiles()
         self._r2env_path = r2env_path
 
+    def get_package_path(self, package_name):
+        return os.path.join(self._r2env_path, self.PACKAGES_DIR, package_name)
+
     def list_available_packages(self):
         return self._packages
 
@@ -96,7 +99,7 @@ class PackageManager:
     def _build_using_meson(self, source_path, dst_path, logfile):
         exit_if_not_exists(['meson', 'ninja'])
         print_console("[-] Building package using meson ...")
-        cmd = "(cd {0} && rm -rf build && meson --buildtype=release --prefix={1} build 2>&1 && ninja -C build && ninja -C build install) > {2}".format(
+        cmd = "(cd {0} && rm -rf build && meson . build --buildtype=release --prefix={1} -Dlocal=true 2>&1 && ninja -C build && ninja -C build install) > {2}".format(
             source_path, dst_path, logfile
         )
         return os.system(cmd) == 0

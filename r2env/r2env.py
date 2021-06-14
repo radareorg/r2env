@@ -5,12 +5,16 @@ import re
 
 import json
 import sys
+from dploy import stow, unstow
 from pathlib import Path
 from package_manager import PackageManager
 from tools import print_console, load_json_file, WARNING, ERROR
 
 
 class R2Env:
+
+    VERSION_FILE = "r2_version"
+
     def __init__(self):
         self._config = self._load_config()
         self._r2env_path = self._config['r2env_path'] if ('r2env_path' in self._config and self._config['r2env_path']) \
@@ -56,9 +60,14 @@ class R2Env:
             return
         self._package_manager.uninstall_package(package)
 
-    def use(self):
-        # TODO
-        pass
+    def use(self, package):
+        cur_ver = self._get_current_version()
+        new_dst_dir = self._package_manager.get_package_path(package)
+        if cur_ver:
+            unstow([self._package_manager.get_package_path(cur_ver)], self._r2env_path)
+        stow([new_dst_dir], self._r2env_path)
+        self._set_current_version(package)
+        print_console("[*] Using {} package".format(package))
 
     @staticmethod
     def version():
@@ -84,3 +93,16 @@ class R2Env:
     def _check_package_format(package):
         p = re.compile("\w+\d@[\d\.\d\.\d,'latest']")
         return p.match(package)
+
+    def _get_current_version(self):
+        version_file = os.path.join(self._r2env_path, self.VERSION_FILE)
+        if not os.path.isfile(version_file):
+            return ''
+        with open(version_file, 'r') as f:
+            version = f.read()
+        return version
+
+    def _set_current_version(self, package):
+        version_file = os.path.join(self._r2env_path, self.VERSION_FILE)
+        with open(version_file, 'w') as f:
+            f.write(package)

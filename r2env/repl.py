@@ -12,10 +12,9 @@ Actions:
 
 init               - create .r2env in current directory
 config             - display current .r2env settings
-install   [pkg]    - build and install given package
+install   [pkg]    - build and install given package. Use --meson to use it as the build system.
 uninstall [pkg]    - remove selected package
 use [pkg]          - use r2 package defined. pkg should be a release version or latest.
-exec [pkg] [r2cmd] - run r2cmd into selected r2 package
 version            - show the current Radare version and its origin
 versions           - List all Radare versions installed
 list               - list all Radare packages available to r2env
@@ -46,11 +45,10 @@ def run_action(r2e, action, args, use_meson):
             return
         r2e.uninstall(args[0])
     elif action == "use":
-        print_console("WIP Command. Stay tunned ;)", WARNING)
-        pass
-    elif action == "exec":
-        print_console("WIP Command. Stay tunned ;)", WARNING)
-        pass
+        if len(args) < 1:
+            print_console("[x] Missing package argument.", ERROR)
+            return
+        r2e.use(args[0])
     elif action == "versions":
         r2e.list_installed_packages()
     elif action == "shell":
