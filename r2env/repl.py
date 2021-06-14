@@ -26,7 +26,7 @@ def run_action(r2e, action, args, use_meson):
     if action == "init":
         r2e.init()
     elif action == "version":
-        r2e.r2env_path()
+        r2e.get_r2_path()
     elif action == "config":
         r2e.show_config()
     elif action == "list":

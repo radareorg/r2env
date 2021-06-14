@@ -24,12 +24,16 @@ class R2Env:
     def init(self):
         r2env_full_path = os.path.join(self._r2env_path, ".r2env")
         if os.path.isdir(r2env_full_path):
-            print_console("[x] Path {} already exists.".format(r2env_full_path), ERROR)
+            print_console("[x] r2env already initialized. Path {} already exists.".format(r2env_full_path), ERROR)
             return
         os.mkdir(r2env_full_path)
+        print_console("[*] r2env initialized at {}".format(r2env_full_path))
 
-    def r2env_path(self):
-        print_console(self._r2env_path if self._r2env_path is not None else "Not r2env configured")
+    def get_r2_path(self):
+        self.exit_if_r2env_not_initialized()
+        r2_version = self._get_current_version()
+        r2_path = self._package_manager.get_package_path(r2_version) if r2_version else "Radare package not configured"
+        print_console(" [*] {0} ({1})".format(r2_version, r2_path))
 
     def show_config(self):
         return json.dumps(self._config)
@@ -43,24 +47,32 @@ class R2Env:
                 print_console(" {}@{}".format(profile, version['id']), formatter=1)
 
     def list_installed_packages(self):
+        self.exit_if_r2env_not_initialized()
         print_console("[*] Installed Radare packages")
         for pkg in self._package_manager.list_installed_packages():
-            print_console("  - {}".format(pkg))
+            if pkg == self._get_current_version():
+                print_console("  [*] {}".format(pkg))
+            else:
+                print_console("  - {}".format(pkg))
 
     def install(self, package, use_meson=False):
+        self.exit_if_r2env_not_initialized()
         if not self._check_package_format(package):
             print_console("[x] Invalid Package format.", level=ERROR)
             return
         profile, version = package.split('@')
         self._package_manager.install_package(profile, version, use_meson=use_meson)
+        print_console("[*] Magic Done! Remember to add the $HOME/.r2env/bin folder to your PATH.")
 
     def uninstall(self, package):
+        self.exit_if_r2env_not_initialized()
         if not self._check_package_format(package):
             print_console("[x] Invalid Package format.", level=ERROR)
             return
         self._package_manager.uninstall_package(package)
 
     def use(self, package):
+        self.exit_if_r2env_not_initialized()
         cur_ver = self._get_current_version()
         new_dst_dir = self._package_manager.get_package_path(package)
         if cur_ver:
@@ -79,7 +91,7 @@ class R2Env:
 
     @staticmethod
     def _load_config():
-        filename = "config/config.json"
+        filename = os.path.join(sys.prefix, "config/config.json")
         config = load_json_file(filename)
         if not config:
             sys.exit(-1)
@@ -106,3 +118,8 @@ class R2Env:
         version_file = os.path.join(self._r2env_path, self.VERSION_FILE)
         with open(version_file, 'w') as file_desc:
             file_desc.write(package)
+
+    def exit_if_r2env_not_initialized(self):
+        if not os.path.isdir(self._r2env_path):
+            print_console("Not r2env initialized. Execute 'r2env init' first.", ERROR)
+            sys.exit(-1)
