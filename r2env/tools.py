@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import json
 import os
 import sys
 
+from shutil import which
 from colorama import Fore, Style
 from git import Repo
-from shutil import which
-import json
 
 
 # Global Vars
@@ -17,7 +17,7 @@ ERROR = 2
 
 def print_console(msg, level=INFO, formatter=0):
     tabs, color = ["", ""]
-    for i in range(formatter):
+    for _ in range(formatter):
         tabs += "    "
     if level == ERROR:
         color = Fore.RED
@@ -29,7 +29,7 @@ def print_console(msg, level=INFO, formatter=0):
 def host_platform():
     if os.name == "nt":
         return "w64"
-    if os.file.exists("/default.prop"):
+    if os.path.isfile("/default.prop"):
         return "android"
     return "unix"
 

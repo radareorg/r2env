@@ -5,8 +5,8 @@ import re
 
 import json
 import sys
-from dploy import stow, unstow
 from pathlib import Path
+from dploy import stow, unstow
 from package_manager import PackageManager
 from tools import print_console, load_json_file, WARNING, ERROR
 
@@ -71,8 +71,8 @@ class R2Env:
 
     @staticmethod
     def version():
-        f = open("version.txt", "r")
-        return f.read()
+        with open("version.txt", "r") as version:
+            return version.read()
 
     def shell(self):
         pass
@@ -91,18 +91,18 @@ class R2Env:
 
     @staticmethod
     def _check_package_format(package):
-        p = re.compile("\w+\d@[\d\.\d\.\d,'latest']")
-        return p.match(package)
+        regexp = re.compile(r"\w+\d@[\d\.\d\.\d,'latest']")
+        return regexp.match(package)
 
     def _get_current_version(self):
         version_file = os.path.join(self._r2env_path, self.VERSION_FILE)
         if not os.path.isfile(version_file):
             return ''
-        with open(version_file, 'r') as f:
-            version = f.read()
+        with open(version_file, 'r') as file_desc:
+            version = file_desc.read()
         return version
 
     def _set_current_version(self, package):
         version_file = os.path.join(self._r2env_path, self.VERSION_FILE)
-        with open(version_file, 'w') as f:
-            f.write(package)
+        with open(version_file, 'w') as file_desc:
+            file_desc.write(package)

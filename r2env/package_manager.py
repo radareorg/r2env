@@ -68,8 +68,7 @@ class PackageManager:
                     print_console("Removed package {}".format(package_name))
                 except Exception as err:
                     print_console("[x] Unable to remove package {0}. Error: {1}".format(package_name, err), ERROR)
-                finally:
-                    break
+                break
         if not pkg_found:
             print_console("[x] Unable to find installed package {0}".format(package_name), ERROR)
 
@@ -81,27 +80,27 @@ class PackageManager:
         print_console("[*] Installing {}@{} package from source".format(profile, version))
         print_console("[-] Cloning {} version".format(version))
         git_fetch(self._packages[profile]["source"], version, source_path)
-        print_console("[-] Cleaning Repo".format(version))
+        print_console("[-] Cleaning Repo")
         git_clean(source_path)
         if use_meson:
             return self._build_using_meson(source_path, dst_path, logfile)
-        else:
-            return self._build_using_acr(source_path, dst_path, logfile)
+        return self._build_using_acr(source_path, dst_path, logfile)
 
-    def _build_using_acr(self, source_path, dst_path, logfile):
+    @staticmethod
+    def _build_using_acr(source_path, dst_path, logfile):
         """Only works in Unix systems"""
         exit_if_not_exists(['make'])
         print_console("[-] Building package using acr ...")
-        cmd = "(cd {0} && rm -rf shlr/capstone && ./configure --with-rpath --prefix={1} 2>&1 && make -j4 2>&1 && make install) > {2}".format(
-            source_path, dst_path, logfile)
+        cmd = "(cd {0} && rm -rf shlr/capstone && ./configure --with-rpath --prefix={1} 2>&1 && make -j4 2>&1" \
+              "&& make install) > {2}".format(source_path, dst_path, logfile)
         return os.system(cmd) == 0
 
-    def _build_using_meson(self, source_path, dst_path, logfile):
+    @staticmethod
+    def _build_using_meson(source_path, dst_path, logfile):
         exit_if_not_exists(['meson', 'ninja'])
         print_console("[-] Building package using meson ...")
-        cmd = "(cd {0} && rm -rf build && meson . build --buildtype=release --prefix={1} -Dlocal=true 2>&1 && ninja -C build && ninja -C build install) > {2}".format(
-            source_path, dst_path, logfile
-        )
+        cmd = "(cd {0} && rm -rf build && meson . build --buildtype=release --prefix={1} -Dlocal=true 2>&1" \
+              "&& ninja -C build && ninja -C build install) > {2}".format(source_path, dst_path, logfile)
         return os.system(cmd) == 0
 
     def _exit_if_package_not_available(self, profile, version):

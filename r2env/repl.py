@@ -6,7 +6,7 @@ from tools import print_console, WARNING, ERROR
 import r2env
 
 
-help_message = """
+HELP_MESSAGE = """
 Usage: r2env [action] [args...]
 Actions:
 
@@ -54,9 +54,8 @@ def run_action(r2e, action, args, use_meson):
     elif action == "shell":
         print_console("WIP Command. Stay tunned ;)", WARNING)
         # r2e.enter_shell(args)
-        pass
     elif action == "help":
-        print_console(help_message)
+        print_console(HELP_MESSAGE)
     else:
         print_console("[X] Action not found", ERROR)
     return

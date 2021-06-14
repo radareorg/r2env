@@ -2,3 +2,7 @@
 disable=
     C0114, # missing-module-docstring
     C0116, # Missing function or method docstring (missing-function-docstring)
+    C0115, # Missing class docstring (missing-class-docstring)
+
+[FORMAT]
+max-line-length=120
