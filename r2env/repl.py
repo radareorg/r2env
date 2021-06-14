@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 import argparse
-from tools import print_console, WARNING, ERROR
-import r2env
+from r2env.tools import print_console, WARNING, ERROR
+from r2env.r2env import R2Env
 
 
 HELP_MESSAGE = """
@@ -69,7 +68,7 @@ def main():
     parser.add_argument("-v", "--version", help="Show r2env version", action="store_true")
     parser.add_argument("-m", "--meson", help="Use meson as your build system.", action="store_true")
     args = parser.parse_args()
-    r2e = r2env.R2Env()
+    r2e = R2Env()
     if args.version:
         print_console(r2e.version())
         return

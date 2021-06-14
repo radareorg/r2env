@@ -7,8 +7,8 @@ import json
 import sys
 from pathlib import Path
 from dploy import stow, unstow
-from package_manager import PackageManager
-from tools import print_console, load_json_file, WARNING, ERROR
+from r2env.package_manager import PackageManager
+from r2env.tools import print_console, load_json_file, WARNING, ERROR
 
 
 class R2Env:

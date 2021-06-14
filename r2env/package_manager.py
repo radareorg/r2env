@@ -5,7 +5,7 @@ import shutil
 import sys
 import time
 
-from tools import load_json_file, git_fetch, git_clean, print_console, ERROR, exit_if_not_exists
+from r2env.tools import load_json_file, git_fetch, git_clean, print_console, ERROR, exit_if_not_exists
 
 
 class PackageManager:
