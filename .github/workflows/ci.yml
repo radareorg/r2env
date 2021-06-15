@@ -11,7 +11,7 @@ on:
 
 jobs:
   pylint:
-    name: pylint
+    name: codecheck-pylint
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
@@ -21,7 +21,7 @@ jobs:
       - name: Run
         run: tox -e py38-codecheck-pylint
   flake8:
-    name: flake8
+    name: codecheck-flake8
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
@@ -31,13 +31,13 @@ jobs:
       - name: Run
         run: tox -e py38-codecheck-flake8
   integration-tests:
-    name: linux integration test
+    name: linux-integration-tests
     runs-on: ubuntu-20.04
     steps:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Install
-      run: pip install . --force-reinstall
+      run: pip install . --user --force-reinstall
     - name: Execute
       run: r2env list || exit 0
     - name: Install r2 using r2env
