@@ -103,7 +103,7 @@ class R2Env:
 
     @staticmethod
     def _check_package_format(package):
-        regexp = re.compile(r"\w+\d@[\d\.\d\.\d,'latest']")
+        regexp = re.compile(r"\w+\d@(?:\d\.\d\.\d|latest)")
         return regexp.match(package)
 
     def _get_current_version(self):
