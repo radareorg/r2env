@@ -39,7 +39,7 @@ jobs:
     - name: Install
       run: sudo pip install . --force-reinstall
     - name: Execute
-      run: r2env list || exit 0
+      run: r2env list
     - name: Install r2 using r2env
       run: |
         r2env init
