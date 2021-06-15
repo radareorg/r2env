@@ -91,7 +91,7 @@ class R2Env:
 
     @staticmethod
     def _load_config():
-        filename = os.path.join(sys.prefix, "config/config.json")
+        filename = os.path.join(os.path.dirname(__file__), 'config', 'config.json')
         config = load_json_file(filename)
         if not config:
             sys.exit(-1)
