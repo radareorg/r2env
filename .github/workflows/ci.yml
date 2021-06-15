@@ -37,7 +37,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Install
-      run: pip install . --user --force-reinstall
+      run: sudo pip install . --force-reinstall
     - name: Execute
       run: r2env list || exit 0
     - name: Install r2 using r2env
@@ -47,4 +47,4 @@ jobs:
         r2env use radare2@latest
         $HOME/.r2env/bin/r2 -v
     - name: Uninstalling
-      run: pip uninstall -y r2env
+      run: sudo pip uninstall -y r2env
