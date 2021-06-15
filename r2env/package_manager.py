@@ -35,7 +35,7 @@ class PackageManager:
 
     @staticmethod
     def _load_profiles():
-        filename = os.path.join(os.path.dirname(__file__), '..', 'config', 'profiles.json')
+        filename = os.path.join(sys.prefix, "config/profiles.json")
         profiles = load_json_file(filename)
         if not profiles:
             sys.exit(-1)
