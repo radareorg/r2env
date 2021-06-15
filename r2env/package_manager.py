@@ -66,7 +66,7 @@ class PackageManager:
                 try:
                     shutil.rmtree(pkg_dir)
                     print_console("Removed package {}".format(package_name))
-                except Exception as err:
+                except OSError as err:
                     print_console("[x] Unable to remove package {0}. Error: {1}".format(package_name, err), ERROR)
                 break
         if not pkg_found:

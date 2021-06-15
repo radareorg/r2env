@@ -64,6 +64,6 @@ def load_json_file(filepath):
     try:
         with open(filepath) as json_file:
             return json.load(json_file)
-    except Exception as err:
+    except OSError as err:
         print_console("File {} not found. Msg: {}".format(filepath, err), ERROR)
         return None

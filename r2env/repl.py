@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-from r2env.tools import print_console, WARNING, ERROR
+import sys
+
+from r2env.tools import print_console, ERROR
 from r2env.r2env import R2Env
 
 
@@ -22,42 +24,42 @@ shell              - open a new shell with PATH env var set
 """
 
 
-def run_action(r2e, action, args, use_meson):
-    if action == "init":
-        r2e.init()
-    elif action == "version":
-        r2e.get_r2_path()
-    elif action == "config":
-        r2e.show_config()
-    elif action == "list":
-        r2e.list_available_packages()
-    elif action == "config":
-        r2e.show_config()
-    elif action == "install":
-        if len(args) < 1:
-            print_console("[x] Missing package argument.", ERROR)
-            return
-        r2e.install(args[0], use_meson=use_meson)
-    elif action == "uninstall":
-        if len(args) < 1:
-            print_console("[x] Missing package argument.", ERROR)
-            return
-        r2e.uninstall(args[0])
-    elif action == "use":
-        if len(args) < 1:
-            print_console("[x] Missing package argument.", ERROR)
-            return
-        r2e.use(args[0])
-    elif action == "versions":
-        r2e.list_installed_packages()
-    elif action == "shell":
-        print_console("WIP Command. Stay tunned ;)", WARNING)
-        # r2e.enter_shell(args)
-    elif action == "help":
-        print_console(HELP_MESSAGE)
-    else:
+def show_help():
+    print_console(HELP_MESSAGE)
+
+
+actions_with_argument = ["install", "uninstall", "use"]
+actions = {
+    "init": R2Env().init,
+    "version": R2Env().get_r2_path,
+    "config": R2Env().show_config,
+    "list": R2Env().list_available_packages,
+    "install": R2Env().install,
+    "uninstall": R2Env().uninstall,
+    "use": R2Env().use,
+    "versions": R2Env().list_installed_packages,
+    "help": show_help
+}
+
+
+def run_action(action, args, use_meson):
+    if action not in actions:
         print_console("[X] Action not found", ERROR)
-    return
+        return
+    if action in actions_with_argument:
+        exit_if_not_argument_is_set(args)
+        if action == "install":
+            actions[action](args[0], use_meson=use_meson)
+        else:
+            actions[action](args[0])
+    else:
+        actions[action]()
+
+
+def exit_if_not_argument_is_set(args):
+    if len(args) < 1:
+        print_console("[x] Missing package argument.", ERROR)
+        sys.exit(-1)
 
 
 def main():
@@ -68,11 +70,10 @@ def main():
     parser.add_argument("-v", "--version", help="Show r2env version", action="store_true")
     parser.add_argument("-m", "--meson", help="Use meson as your build system.", action="store_true")
     args = parser.parse_args()
-    r2e = R2Env()
     if args.version:
-        print_console(r2e.version())
+        print_console(R2Env().version())
         return
-    run_action(r2e, args.action, args.args, args.meson)
+    run_action(args.action, args.args, args.meson)
 
 
 if __name__ == "__main__":
