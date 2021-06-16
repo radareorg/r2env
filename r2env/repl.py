@@ -28,7 +28,7 @@ def show_help():
     print_console(HELP_MESSAGE)
 
 
-actions_with_argument = ["install", "uninstall"]
+actions_with_argument = ["install", "uninstall", "use"]
 actions = {
     "init": R2Env().init,
     "version": R2Env().get_r2_path,
