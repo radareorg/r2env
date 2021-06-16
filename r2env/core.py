@@ -35,7 +35,8 @@ class R2Env:
         print_console(" [*] {0} ({1})".format(r2_version, r2_path))
 
     def show_config(self):
-        return json.dumps(self._config)
+        print_console("[*] Current r2env config:")
+        print_console(json.dumps(self._config))
 
     def list_available_packages(self):
         print_console("[*] List of available Radare packages")
@@ -70,8 +71,12 @@ class R2Env:
             return
         self._package_manager.uninstall_package(package)
 
-    def use(self, package):
+    def use(self, package=None):
         self.exit_if_r2env_not_initialized()
+        if not package:
+            print_console("[x] Package not defined. Please use 'r2env use' with one installed package. ", ERROR)
+            self.list_installed_packages()
+            return
         cur_ver = self._get_current_version()
         new_dst_dir = self._package_manager.get_package_path(package)
         if cur_ver:

@@ -28,7 +28,7 @@ def show_help():
     print_console(HELP_MESSAGE)
 
 
-actions_with_argument = ["install", "uninstall", "use"]
+actions_with_argument = ["install", "uninstall"]
 actions = {
     "init": R2Env().init,
     "version": R2Env().get_r2_path,
@@ -63,6 +63,7 @@ def exit_if_not_argument_is_set(args, action):
             actions["versions"]()
         else:
             print_console("[x] Missing package argument. ( as for example: radare2@latest)", ERROR)
+        print_console("[x] Missing package argument. ( as for example: radare2@latest)", ERROR)
         sys.exit(-1)
 
 
