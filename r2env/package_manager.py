@@ -56,6 +56,8 @@ class PackageManager:
         else:
             print_console("[x] Something wrong happened during the build process. Check {} for more information.".format
                           (logfile), level=ERROR)
+            if os.path.isdir(dst_dir):
+                shutil.rmtree(dst_dir)
 
     def uninstall_package(self, package_name):
         pkg_found = False
