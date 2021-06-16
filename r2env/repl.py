@@ -47,7 +47,7 @@ def run_action(action, args, use_meson):
         print_console("[X] Action not found", ERROR)
         return
     if action in actions_with_argument:
-        exit_if_not_argument_is_set(args)
+        exit_if_not_argument_is_set(args, action)
         if action == "install":
             actions[action](args[0], use_meson=use_meson)
         else:
@@ -56,9 +56,13 @@ def run_action(action, args, use_meson):
         actions[action]()
 
 
-def exit_if_not_argument_is_set(args):
+def exit_if_not_argument_is_set(args, action):
     if len(args) < 1:
-        print_console("[x] Missing package argument.", ERROR)
+        if action == "use":
+            print_console("[x] Package not defined. Please use 'r2env use' with one installed package. ", ERROR)
+            actions["versions"]()
+        else:
+            print_console("[x] Missing package argument. ( as for example: radare2@latest)", ERROR)
         sys.exit(-1)
 
 
