@@ -22,12 +22,11 @@ class R2Env:
         self._package_manager = PackageManager(self._r2env_path)
 
     def init(self):
-        r2env_full_path = os.path.join(self._r2env_path, ".r2env")
-        if os.path.isdir(r2env_full_path):
-            print_console("[x] r2env already initialized. Path {} already exists.".format(r2env_full_path), ERROR)
+        if os.path.isdir(self._r2env_path):
+            print_console("[x] r2env already initialized. Path {} already exists.".format(self._r2env_path), ERROR)
             return
-        os.mkdir(r2env_full_path)
-        print_console("[*] r2env initialized at {}".format(r2env_full_path))
+        os.mkdir(self._r2env_path)
+        print_console("[*] r2env initialized at {}".format(self._r2env_path))
 
     def get_r2_path(self):
         self.exit_if_r2env_not_initialized()

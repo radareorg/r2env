@@ -4,7 +4,7 @@ import argparse
 import sys
 
 from r2env.tools import print_console, ERROR
-from r2env.r2env import R2Env
+from r2env.core import R2Env
 
 
 HELP_MESSAGE = """
