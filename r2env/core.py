@@ -35,7 +35,8 @@ class R2Env:
         print_console(" [*] {0} ({1})".format(r2_version, r2_path))
 
     def show_config(self):
-        return json.dumps(self._config)
+        print_console("[*] Current r2env config:")
+        print_console(json.dumps(self._config))
 
     def list_available_packages(self):
         print_console("[*] List of available Radare packages")
