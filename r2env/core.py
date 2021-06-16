@@ -93,7 +93,7 @@ class R2Env:
     def shell(self, cmd = ""):
         line = "export PS1=\"r2env\\$ \";export PATH=\""+self._r2env_path+"/bin:$PATH\"; $SHELL -f"
         if cmd.strip() == "":
-       	    return os.system(line)
+            return os.system(line)
         return os.system(line + " -c '"+cmd+"'")
 
     @staticmethod
