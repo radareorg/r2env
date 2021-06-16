@@ -44,7 +44,6 @@ jobs:
       run: |
         r2env init
         r2env install radare2@latest
-        for i in `ls /home/runner/.r2env/log/`; do echo $i; cat $i; done
     - name: Execute latest r2 version
       run: |
         r2env use radare2@latest
