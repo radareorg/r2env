@@ -42,10 +42,12 @@ class PackageManager:
         return profiles
 
     def install_package(self, profile, version, use_meson):
-        logfile = os.path.join(self._r2env_path, self.LOG_DIR, "{}_{}_{}_build.txt".format(
-            profile, version, round(time.monotonic() * 1000)))
+        log_path = os.path.join(self._r2env_path, self.LOG_DIR)
+        logfile = os.path.join(log_path, "{}_{}_{}_build.txt".format(profile, version, round(time.monotonic() * 1000)))
         source_path = os.path.join(os.path.join(self._r2env_path, self.SOURCE_DIR, profile))
         dst_dir = os.path.join(os.path.join(self._r2env_path, self.PACKAGES_DIR), "{}@{}".format(profile, version))
+        if not os.path.isdir(log_path):
+            os.makedirs(log_path)
         if not os.path.isdir(source_path):
             os.makedirs(source_path)
         if not os.path.isdir(dst_dir):
