@@ -91,7 +91,7 @@ class R2Env:
             return version.read()
 
     def shell(self):
-        pass
+        return os.system("export PS1=\"r2env\\$ \";export PATH=\""+self._r2env_path+"/bin:$PATH\"; $SHELL -f")
 
     @staticmethod
     def _load_config():

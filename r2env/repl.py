@@ -35,6 +35,7 @@ actions = {
     "config": R2Env().show_config,
     "list": R2Env().list_available_packages,
     "install": R2Env().install,
+    "shell": R2Env().shell,
     "uninstall": R2Env().uninstall,
     "use": R2Env().use,
     "versions": R2Env().list_installed_packages,
