@@ -38,15 +38,16 @@ jobs:
       uses: actions/checkout@v2
     - name: Install
       run: sudo pip install . --force-reinstall
-    - name: See Logs
-      run: cat /home/runner/.r2env/log/radare2_latest_166164_build.txt
-    - name: Execute
+    - name: Execute r2env
       run: r2env list
     - name: Install r2 using r2env
       run: |
         r2env init
         r2env install radare2@latest
+        for i in `ls /home/runner/.r2env/log/`; do echo $i; cat $i; done
+    - name: Execute latest r2 version
+      run: |
         r2env use radare2@latest
         $HOME/.r2env/bin/r2 -v
     - name: Uninstalling
-      run: sudo pip uninstall -y r2env
+      run: sudo pip uninstall -y r2env && rm -rf $HOME/.r2env
