@@ -29,6 +29,7 @@ def show_help():
 
 
 actions_with_argument = ["install", "uninstall", "use"]
+actions_with_arguments = ["shell"]
 actions = {
     "init": R2Env().init,
     "version": R2Env().get_r2_path,
@@ -46,8 +47,9 @@ actions = {
 def run_action(action, args, use_meson):
     if action not in actions:
         print_console("[X] Action not found", ERROR)
-        return
-    if action in actions_with_argument:
+    elif action in actions_with_arguments:
+        actions[action](" ".join(args))
+    elif action in actions_with_argument:
         exit_if_not_argument_is_set(args, action)
         if action == "install":
             actions[action](args[0], use_meson=use_meson)

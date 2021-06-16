@@ -90,8 +90,11 @@ class R2Env:
         with open("version.txt", "r") as version:
             return version.read()
 
-    def shell(self):
-        return os.system("export PS1=\"r2env\\$ \";export PATH=\""+self._r2env_path+"/bin:$PATH\"; $SHELL -f")
+    def shell(self, cmd = ""):
+        if cmd.strip() == "":
+       	    return os.system("export PS1=\"r2env\\$ \";export PATH=\""+self._r2env_path+"/bin:$PATH\"; $SHELL -f")
+        else:
+            return os.system("export PS1=\"r2env\\$ \";export PATH=\""+self._r2env_path+"/bin:$PATH\"; $SHELL -f -c '"+cmd+"'")
 
     @staticmethod
     def _load_config():
