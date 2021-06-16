@@ -10,24 +10,43 @@ on:
 
 
 jobs:
-  build:
-    name: linux
+  pylint:
+    name: codecheck-pylint
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: pip install -r requirements/test.txt
+      - name: Run
+        run: tox -e py38-codecheck-pylint
+  flake8:
+    name: codecheck-flake8
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: pip install -r requirements/test.txt
+      - name: Run
+        run: tox -e py38-codecheck-flake8
+  integration-tests:
+    name: linux-integration-tests
     runs-on: ubuntu-20.04
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Build
-      run: python setup.py build
     - name: Install
-      run: sudo python setup.py install
-    - name: Execute
-      run: r2env help || exit 0
-    - name: add_r0
+      run: sudo pip install . --force-reinstall
+    - name: Execute r2env
+      run: r2env list
+    - name: Install r2 using r2env
       run: |
         r2env init
-        r2env add r0@git
-        r2env shell r0 -h
-        r2env unuse r0@git
-        r2env shell r0 -h || true
+        r2env install radare2@latest
+    - name: Execute latest r2 version
+      run: |
+        r2env use radare2@latest
+        $HOME/.r2env/bin/r2 -v
     - name: Uninstalling
-      run: yes | sudo pip uninstall r2env
+      run: sudo pip uninstall -y r2env && rm -rf $HOME/.r2env

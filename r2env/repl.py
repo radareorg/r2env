@@ -1,182 +1,80 @@
-import argparse
-from r2env.tools import host_platform
-from r2env.tools import user_home
-from r2env.tools import env_path
-from r2env.tools import get_size
-from r2env.tools import autoversion
-from r2env.tools import slurp
-import r2env
-import dploy
-import sys
-import os
+# -*- coding: utf-8 -*-
 
-help_message = """
+import argparse
+import sys
+
+from r2env.tools import print_console, ERROR
+from r2env.core import R2Env
+
+
+HELP_MESSAGE = """
 Usage: r2env [action] [args...]
 Actions:
 
-init      - create .r2env in current directory
-path      - display current .r2env settings
-list      - list packages
-rm [pkg]  - remove pkg
-add [pkg] - build and install given package
-use [pkg] - set symlinks using dploy/stow into .r2env/prefix
-version   - show version string
-shell     - open a new shell with PATH env var set
+init               - create .r2env in current directory
+config             - display current .r2env settings
+install   [pkg]    - build and install given package. Use --meson to use it as the build system.
+uninstall [pkg]    - remove selected package
+use [pkg]          - use r2 package defined. pkg should be a release version or latest.
+version            - show the current Radare version and its origin
+versions           - List all Radare versions installed
+list               - list all Radare packages available to r2env
+shell              - open a new shell with PATH env var set
 
 """
 
-def enter_shell(r2path, args):
-	newpath = os.path.join(r2path, "prefix", "bin")
-	p = newpath + ":" + os.environ["PATH"]
-	if len(args) == 0:
-		print("enter [.r2env/prefix] shell")
-	# macos
-	os.environ["DYLD_LIBRARY_PATH"] = os.path.join(r2path, "prefix", "lib")
-	os.environ["LD_LIBRARY_PATH"] = os.path.join(r2path, "prefix", "lib")
-	os.environ["R2ENV_PATH"] = r2path
-	dlp = os.path.join(r2path, "prefix", "lib")
-	# os.system(os.environ["SHELL"])
-	if len(args) == 0:
-		os.system("export PATH='"+p+"';DYLD_LIBRARY_PATH="+dlp+" sh")
-		print("leave [.r2env/prefix] shell")
-	else:
-		cmd = (" ".join(args))
-		os.system("export PATH='"+p+"';DYLD_LIBRARY_PATH="+dlp+" " + cmd)
-		
 
-def add_package(pkg, profile):
-	print("Adding package")
-	pkg.build(profile)
-	pkg.install()
+def show_help():
+    print_console(HELP_MESSAGE)
 
-def del_package(pkg, profile):
-	print("Deleting package")
-	pkg.clean(profile)
 
-def cb_use(sauce, prefix):
-	dploy.unstow([sauce], prefix)
-	dploy.stow(  [sauce], prefix)
+actions_with_argument = ["install", "uninstall", "use"]
+actions = {
+    "init": R2Env().init,
+    "version": R2Env().get_r2_path,
+    "config": R2Env().show_config,
+    "list": R2Env().list_available_packages,
+    "install": R2Env().install,
+    "uninstall": R2Env().uninstall,
+    "use": R2Env().use,
+    "versions": R2Env().list_installed_packages,
+    "help": show_help
+}
 
-def cb_unuse(sauce, prefix):
-	dploy.unstow([sauce], prefix)
 
-def match_dst(args, cb):
-	ret = False
-	envp = env_path()
-	if envp is None:
-		print("No r2env defined")
-		sys.exit(1)
-	prefix = os.path.join(envp, "prefix")
-	try:
-		os.mkdir(prefix)
-	except: pass
-	for arg in args:
-		dstdir = os.path.join(envp, "dst", arg)
-		if os.path.isdir(dstdir):
-			sauce = os.path.join(envp, "dst", arg, prefix[1:])
-			cb(sauce, prefix)
-			ret = True
-	return ret
+def run_action(action, args, use_meson):
+    if action not in actions:
+        print_console("[X] Action not found", ERROR)
+        return
+    if action in actions_with_argument:
+        exit_if_not_argument_is_set(args)
+        if action == "install":
+            actions[action](args[0], use_meson=use_meson)
+        else:
+            actions[action](args[0])
+    else:
+        actions[action]()
 
-def match_pkg(pkgs, args, cb):
-	envp = env_path()
-	if envp is None:
-		print("No r2env defined")
-		sys.exit(1)
-	targets = autoversion(args)
-	for pkg in pkgs:
-		name = pkg.header["name"]
-		for profile in pkg.header["profiles"]:
-			namever = name + "@" + profile["version"] + "#" + profile["platform"]
-			if namever in args:
-				cb(pkg, profile)
-				return True
-			namever = name + "@" + profile["version"]
-			if namever in args:
-				cb(pkg, profile)
-				return True
-	return False
 
-def run_action(e, action, args):
-	if action == "list":
-		arg = args[0] if len(args) > 0 else ""
-		if arg == "":
-			print("-- Installed:")
-		if arg.find("i") != -1 or arg == "":
-			for pkg in e.installed_packages():
-				pkgdir = os.path.join(env_path(), "dst", pkg)
-				gitdir = os.path.join(env_path(), "src", pkg)
-				ts = slurp(os.path.join(pkgdir, ".timestamp.txt"))
-				sz = str(int(get_size(pkgdir) / (1024 * 1024)))
-				sz2 = str(int(get_size(gitdir) / (1024 * 1024))) + " MB"
-				padpkg = pkg.ljust(16);
-				padsz = str(sz + " / " + sz2).ljust(16);
-				print(padpkg + "  |  " + padsz + "  |  " + ts)
-		if arg == "":
-			print("")
-			print("-- Available:")
-		if arg.find("a") != -1 or arg == "":
-			for pkg in e.available_packages():
-				print(pkg.tostring())
-	elif action == "init":
-		e.init()
-	elif action == "path":
-		renv = env_path()
-		if renv is not None:
-			print(os.path.join(renv, "prefix", "bin"))
-	elif action == "rm":
-		envp = env_path()
-		if envp is None:
-			print("No r2env defined")
-			sys.exit(1)
-		for epkg in e.available_packages():
-			for profile in epkg.header["profiles"]:
-				name = epkg.header["name"]
-				namever = name + "@" + profile["version"]
-				if namever in args:
-					del_package(epkg, profile)
-					return True
-		print("Cannot find pkg")
-	elif action == "add":
-		targets = autoversion(args)
-		pkgs = e.available_packages()
-		if not match_pkg(pkgs, targets, add_package):
-			print("Cannot find pkg")
-	elif action == "use":
-		targets = autoversion(args)
-		if not match_dst(targets, cb_use):
-			print("Cannot find " + dstdir)
-	elif action == "unuse":
-		targets = autoversion(args)
-		if not match_dst(targets, cb_unuse):
-			print("Cannot find " + dstdir)
-	elif action == "help":
-		print(help_message)
-	elif action == "shell":
-		enter_shell(env_path(), args)
-	elif action == "host":
-		print(host_platform())
-	elif action == "version":
-		print(e.version())
-	else:
-		return False
-	return True
+def exit_if_not_argument_is_set(args):
+    if len(args) < 1:
+        print_console("[x] Missing package argument.", ERROR)
+        sys.exit(-1)
+
 
 def main():
-	parser = argparse.ArgumentParser()
-	parser.add_argument("action", help="run action (see 'r2env help' for more details).", action="store")
-	parser.add_argument("-v", "--version", help="show version string", action="store_true")
-	parser.add_argument('args', metavar='N', nargs='*', type=str, help='arguments ...')
-	args = parser.parse_args()
-	
-	e = r2env.R2Env()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("action", help="run specified action. (Run r2env help for more information)",
+                        action="store", default=["help"])
+    parser.add_argument('args', metavar='args', nargs='*', type=str, help='Specified arguments')
+    parser.add_argument("-v", "--version", help="Show r2env version", action="store_true")
+    parser.add_argument("-m", "--meson", help="Use meson as your build system.", action="store_true")
+    args = parser.parse_args()
+    if args.version:
+        print_console(R2Env().version())
+        return
+    run_action(args.action, args.args, args.meson)
 
-	if args.version:
-		print(e.version())
-		return
-	if not run_action(e, args.action, args.args):
-		print(help_message)
-		sys.exit(1)
-	sys.exit(0)
-	#print("r2env")
-	#print(e.version())
+
+if __name__ == "__main__":
+    main()
