@@ -10,6 +10,8 @@ from dploy import stow, unstow
 from r2env.package_manager import PackageManager
 from r2env.tools import print_console, load_json_file, WARNING, ERROR
 
+def get_script_path():
+    return os.path.dirname(os.path.realpath(__file__))
 
 class R2Env:
 
@@ -87,7 +89,7 @@ class R2Env:
 
     @staticmethod
     def version():
-        with open("version.txt", "r") as version:
+        with open(get_script_path () + "/version.txt", "r") as version:
             return version.read()
 
     def shell(self, cmd=""):
