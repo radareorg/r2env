@@ -98,9 +98,9 @@ class PackageManager:
         extra_flags = ""
         if os.path.isfile("/default.prop"):
             extra_flags = " --with-compiler=termux"
-        cmd = "(cd {0} && rm -rf shlr/capstone && ./configure " + extra_flags + \
-              " --with-rpath --prefix={1} 2>&1 && make -j4 2>&1" \
-              "&& make install) > {2}".format(source_path, dst_path, logfile)
+        cmd = "(cd {0} && rm -rf shlr/capstone && ./configure {1}" \
+              " --with-rpath --prefix={2} 2>&1 && make -j4 2>&1" \
+              "&& make install) > {3}".format(source_path, extra_flags, dst_path, logfile)
         return os.system(cmd) == 0
 
     @staticmethod
