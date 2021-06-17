@@ -87,7 +87,8 @@ class R2Env:
 
     @staticmethod
     def version():
-        with open("version.txt", "r") as version:
+        thispath = os.path.dirname(os.path.realpath(__file__))
+        with open(thispath + "/version.txt", "r") as version:
             return version.read()
 
     def shell(self, cmd=""):
