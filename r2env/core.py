@@ -10,6 +10,7 @@ from dploy import stow, unstow
 from r2env.package_manager import PackageManager
 from r2env.tools import print_console, load_json_file, WARNING, ERROR
 
+
 class R2Env:
 
     VERSION_FILE = "r2_version"
