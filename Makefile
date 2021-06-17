@@ -4,6 +4,9 @@ all:
 	pip install .
 
 pub:
+	rm -rf dist
+	$(PYTHON) setup.py sdist
+	$(PYTHON) setup.py build
 	twine upload --repository-url https://upload.pypi.org/legacy/ --verbose dist/*
 
 install:
