@@ -1,3 +1,8 @@
 .idea
 **/__pycache__/
 venv
+.DS_Store
+AUTHORS
+ChangeLog
+dist/*
+r2env.egg-info
