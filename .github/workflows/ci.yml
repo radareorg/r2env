@@ -2,8 +2,7 @@ name: CI
 
 on:
   release:
-    types:
-      - created
+    types: [published]
   push:
     branches:
       - master
@@ -59,7 +58,11 @@ jobs:
     name: Publish to pypi
     runs-on: ubuntu-20.04
     needs: [integration-tests, flake8, pylint]
-    if: github.event_name == 'release' && github.event.action == 'created'
+    if: github.event_name == 'release' && github.event.action == 'published'
     steps:
+      - name: Checkout
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: pip install -r requirements/dist.txt
       - name: Release
         run: make pub
