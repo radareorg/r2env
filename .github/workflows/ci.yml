@@ -61,7 +61,7 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - name: Checkout
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
       - name: Install Dependencies
         run: pip install -r requirements/dist.txt
       - name: Release
