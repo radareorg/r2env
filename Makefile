@@ -6,9 +6,7 @@ all:
 pub:
 	rm -rf dist
 	$(PYTHON) setup.py sdist
-	$(PYTHON) setup.py build
-	twine upload --repository-url https://upload.pypi.org/legacy/ --verbose dist/*
-	#twine upload --repository=r2env --verbose dist/*
+	twine upload --repository=pypi --verbose dist/*
 
 install:
 	pip install .

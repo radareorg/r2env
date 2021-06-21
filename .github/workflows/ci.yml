@@ -50,3 +50,11 @@ jobs:
         $HOME/.r2env/bin/r2 -v
     - name: Uninstalling
       run: sudo pip uninstall -y r2env && rm -rf $HOME/.r2env
+  release-job:
+    name: Publish to pypi
+    runs-on: ubuntu-20.04
+    needs: [integration-tests, flake8, pylint]
+    if: github.event_name == 'release' && github.event.action == 'created'
+    steps:
+      - name: Release
+        run: make pub
