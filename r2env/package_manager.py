@@ -94,7 +94,7 @@ class PackageManager:
     def _build_using_acr(source_path, dst_path, logfile):
         """Only works in Unix systems"""
         exit_if_not_exists(['make'])
-        print_console("[-] Building package using acr for Termux...")
+        print_console("[-] Building package using acr...")
         extra_flags = ""
         if os.path.isfile("/default.prop"):
             extra_flags = " --with-compiler=termux"
