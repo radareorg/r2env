@@ -21,7 +21,15 @@
       {
         "id": "5.3.1",
         "packages:": {
-
+          "w64": "radare2-5.3.1-w64.zip",
+          "deb_x64": "radare2_5.3.1_amd64.deb"
+        }
+      },
+      {
+        "id": "5.4.0",
+        "packages:": {
+          "w64": "radare2-5.4.0-w64.zip",
+          "deb_x64": "radare2_5.4.0_amd64.deb"
         }
       },
       {
