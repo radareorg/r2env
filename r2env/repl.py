@@ -91,8 +91,8 @@ def run_action(argp):
 
 def exit_if_not_argument_is_set(args, action):
     if len(args) < 1:
-        if action == "use":
-            print_console("[x] Package not defined. Please use 'r2env use' with one installed package. ", ERROR)
+        if action == "use" or action == "rm" or action == "uninstall":
+            print_console("[x] Package not defined.", ERROR)
             R2Env().list_installed_packages()
         else:
             print_console("[x] Missing package argument.", ERROR)

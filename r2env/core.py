@@ -66,7 +66,11 @@ class R2Env:
         if not self._check_package_format(package):
             print_console("[x] Invalid package format.", level=ERROR)
             return
-        profile, version = package.split('@')
+        try:
+            profile, version = package.split('@')
+        except:
+            profile = package
+            version = "git"
         self._package_manager.install_package(profile, version, use_meson=use_meson, use_dist=use_dist)
         print_console("[*] Add $HOME/.r2env/bin to your PATH or use 'r2env shell'.")
 
