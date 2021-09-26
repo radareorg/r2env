@@ -105,6 +105,9 @@ class R2Env:
             return version.read()
 
     def shell(self, cmd=""):
+        if os.name== "nt":
+            os.system("set PATH="+self._r2env_path+"\\bin;%PATH% && cmd")
+            return True
         line = "export PS1=\"r2env\\$ \";export PKG_CONFIG_PATH=\""
         line = line + self._r2env_path+"/lib/pkgconfig\";export PATH=\""
         line = line + self._r2env_path + "/bin:$PATH\"; $SHELL -f"

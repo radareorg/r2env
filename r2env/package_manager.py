@@ -121,6 +121,19 @@ class PackageManager:
         if sysname == "Windows":
             with ZipFile(ofile, 'r') as z:
                 z.extractall()
+                dst = os.path.sep.join([self._r2env_path, "bin"])
+                for f in z.namelist():
+                    if f.endswith(".exe") or f.endswith(".dll") and f.find("bin") != -1:
+                        fname = os.path.basename(f)
+                        d = os.path.sep.join([dst, fname])
+                        dname = os.path.dirname(d)
+                        if not os.path.isdir(dname):
+                            os.makedirs(dname, 493) # 0755)
+                        shutil.copyfile(f, d)
+                        print(f)
+                f = os.path.sep.join([self._r2env_path, "bin", "radare2.exe"])
+                d = os.path.sep.join([self._r2env_path, "bin", "r2.exe"])
+                shutil.copyfile(f, d)
         if sysname == "Linux" and os.path.exists("/usr/bin/dpkg"):
             if os.system("sudo dpkg -i " + ofile) == 0:
                 return True
