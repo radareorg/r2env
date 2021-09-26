@@ -5,8 +5,7 @@ import shutil
 import sys
 import time
 
-from r2env.tools import load_json_file, git_fetch, git_clean, print_console, ERROR, exit_if_not_exists
-
+from r2env.tools import load_json_file, git_fetch, git_clean, print_console, ERROR, exit_if_not_exists, host_distname
 
 class PackageManager:
 
@@ -53,7 +52,9 @@ class PackageManager:
         if not os.path.isdir(dst_dir):
             os.makedirs(dst_dir)
         self._exit_if_package_not_available(profile, version)
-        if self._build_from_source(profile, version, source_path, dst_dir, logfile, use_meson=use_meson):
+        if self._install_from_dist(profile, version, source_path, dst_dir, logfile, use_meson=use_meson):
+            print_console("[*] Binary package {}@{} installed successfully".format(profile, version))
+        elif self._build_from_source(profile, version, source_path, dst_dir, logfile, use_meson=use_meson):
             print_console("[*] Package {}@{} installed successfully".format(profile, version))
         else:
             print_console("[x] Something wrong happened during the build process. Check {} for more information.".format
@@ -66,18 +67,62 @@ class PackageManager:
         for package in self.list_installed_packages():
             if package_name == package:
                 pkg_found = True
-                pkg_dir = os.path.join(os.path.join(self._r2env_path, self.PACKAGES_DIR), package_name)
-                try:
-                    shutil.rmtree(pkg_dir)
-                    print_console("Removed package {}".format(package_name))
-                except OSError as err:
-                    print_console("[x] Unable to remove package {0}. Error: {1}".format(package_name, err), ERROR)
+                is_distro_package = True
+                if is_distro_package:
+                    kv = package.split("@")
+                    print(package)
+                    self._uninstall_from_dist(kv[0], kv[1])
+                else:
+                    pkg_dir = os.path.join(os.path.join(self._r2env_path, self.PACKAGES_DIR), package_name)
+                    try:
+                        shutil.rmtree(pkg_dir)
+                        print_console("Removed package {}".format(package_name))
+                    except OSError as err:
+                        print_console("[x] Unable to remove package {0}. Error: {1}".format(package_name, err), ERROR)
                 break
         if not pkg_found:
             print_console("[x] Unable to find installed package {0}".format(package_name), ERROR)
 
-    def _build_from_package(self):
-        pass
+    def _get_pkgname(self, profile, version, cos):
+        for pkgv in self._packages[profile]["versions"]:
+            if pkgv["id"] == version:
+                for pkgd in pkgv["packages"].keys():
+                    if pkgd == cos:
+                        return pkgv["packages"][pkgd]
+        return None
+
+    def _get_disturl(self, profile, version, cos):
+        gh = "https://github.com/radareorg/radare2/releases/download/"
+        f = self._get_pkgname(profile, version, cos)
+        if f is not None:
+            return "/".join([gh, version, f])
+        return None
+
+    def _install_from_dist(self, profile, version, source_path, dst_path, logfile, use_meson=False):
+        print_console("[*] Installing {}@{} package from binary dist".format(profile, version))
+        dn = host_distname()
+        disturl = self._get_disturl(profile, version, dn)
+        pkgname = self._get_pkgname(profile, version, dn)
+        print(disturl)
+        os.system("wget -c " + disturl)
+        vdir = "/tmp/prefix-r2"
+        sysname = os.uname().sysname
+        if sysname == "Darwin":
+            os.system("sudo installer -pkg " + pkgname + " -target " + vdir)
+        # os.system("pkgutil --volume " + vdir + " " + "radare2-" + version + "-" + dn + ".pkg")
+        # TODO: checksum
+        return True
+
+    def _uninstall_from_dist(self, profile, version):
+        dn = host_distname()
+        print_console("[*] Uninstalling {}@{} package from binary dist".format(profile, version))
+        sysname = os.uname().sysname
+        if sysname == "Darwin":
+            pkgname = "org.radare.radare2"
+            os.system("pkgutil --pkg-info " + pkgname)
+            os.system("cd / && pkgutil --only-files --files "+pkgname+" | tr '\\n' '\\0' | xargs -n 1 -0 sudo rm -f")
+            os.system("cd / && pkgutil --only-dirs --files "+pkgname+" | tail -r | tr '\\n' '\\0' | xargs -n 1 -0 sudo rmdir")
+        return True
 
     def _build_from_source(self, profile, version, source_path, dst_path, logfile, use_meson=False):
         exit_if_not_exists(['git'])

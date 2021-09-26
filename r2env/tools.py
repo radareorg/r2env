@@ -34,6 +34,29 @@ def host_platform():
     return "unix"
 
 
+# TODO :improve to support all archs
+def host_distname():
+    sysname = os.uname().sysname
+    machine = os.uname().machine
+    if sysname == "Darwin":
+        if machine == "x86_64":
+            return "mac_x64"
+        elif machine == "arm64":
+            return "mac_arm64"
+        return None
+    if sysname == "Linux":
+        if not os.path.exists("/usr/bin/dpkg"):
+            return None
+        if machine == "x86_64":
+            return "deb_x64"
+        return "deb_i386"
+    if os.name == "nt":
+        return "w64"
+    if os.path.isfile("/default.prop"):
+        return "android"
+    return None
+
+
 def git_fetch(url, version, source_path):
     if os.path.isdir(os.path.join(source_path, ".git")):
         repo = Repo(source_path)
