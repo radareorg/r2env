@@ -39,8 +39,12 @@ def host_platform():
 
 # TODO :improve to support all archs
 def host_distname():
-    sysname = os.uname().sysname
-    machine = os.uname().machine
+    try:
+        sysname = os.uname().sysname
+        machine = os.uname().machine
+    except:
+        sysname = "w64"
+        machine = "amd64"
     if sysname == "Darwin":
         if machine == "x86_64":
             return "mac_x64"
