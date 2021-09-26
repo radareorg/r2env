@@ -104,18 +104,16 @@ class PackageManager:
         dn = host_distname()
         disturl = self._get_disturl(profile, version, dn)
         pkgname = self._get_pkgname(profile, version, dn)
-        print(disturl)
-        os.system("wget -qc " + disturl)
+        ofile = "/".join([self._r2env_path, "src", pkgname])
+        os.system("wget -O " + ofile + " -qc " + disturl)
         sysname = os.uname().sysname
+        # TODO: checksum
         if sysname == "Darwin":
-            if os.system("sudo installer -pkg " + pkgname + " -target /") == 0:
+            if os.system("sudo installer -pkg " + ofile + " -target /") == 0:
                 return True
         if sysname == "Linux" and os.path.exists("/usr/bin/dpkg"):
-            if os.system("sudo dpkg -i " + pkgname) == 0:
+            if os.system("sudo dpkg -i " + ofile) == 0:
                 return True
-       
-       
-        # TODO: checksum
         return False
 
     def _uninstall_from_dist(self, profile, version):
