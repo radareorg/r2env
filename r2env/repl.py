@@ -12,25 +12,25 @@ Usage: r2env [-flags] [action] [args...]
 
 Flags:
 
--h, --help         - show this help
--v, --version      - display r2env version
--m, --meson        - use meson instead of acr
--p, --package      - install the dist package instead of building
--l, --list         - list available and installed packages
+-h, --help     - show this help
+-v, --version  - display r2env version
+-m, --meson    - use meson instead of acr
+-p, --package  - install the dist package instead of building
+-l, --list     - list available and installed packages
 
 Actions:
 
-init               - create ~/.r2env directory
-config             - display current .r2env settings
-install   [pkg]    - build and install given package. Use --meson to use it as the build system.
-uninstall [pkg]    - remove selected package
-use [pkg]          - use r2 package defined. pkg should be a release version or git.
-path               - show path of current r2 in use
-version            - show version of r2env
-versions           - List all Radare versions installed
-list               - list all Radare packages available to r2env
-shell              - open a new shell with PATH env var set
-purge              - remove ~/.r2env
+init           - create ~/.r2env directory
+config         - display current .r2env settings
+add [pkg]      - build and install given package. See -p and -m
+use [pkg]      - use r2 package defined. pkg should be a release version or git.
+rm [pkg]       - remove package from ~/.r2env
+path           - show path of current r2 in use
+version        - show version of r2env
+versions       - list installed packages
+list           - list all packages available to r2env
+shell          - enter a new shell with PATH env var set
+purge          - remove ~/.r2env
 
 """
 
@@ -47,16 +47,20 @@ actions_with_argument = ["install", "uninstall", "use"]
 actions_with_arguments = ["shell"]
 actions = {
     "init": R2Env().init,
+    "v": show_version,
     "version": show_version,
     "path": R2Env().get_r2_path,
     "shell": R2Env().shell,
     "config": R2Env().show_config,
     "list": R2Env().list_packages,
+    "add": R2Env().install,
     "install": R2Env().install,
     "installed": R2Env().list_installed_packages,
     "uninstall": R2Env().uninstall,
+    "rm": R2Env().uninstall,
     "use": R2Env().use,
     "purge": R2Env().purge,
+    "h": show_help,
     "help": show_help
 }
 
@@ -80,12 +84,9 @@ def run_action(argp):
         actions[action](" ".join(args))
     elif action in actions_with_argument:
         exit_if_not_argument_is_set(args, action)
-        if action == "install":
-            actions[action](args[0], use_meson=argp.meson, use_dist=argp.package)
-        else:
-            actions[action](args[0])
+        actions[action](args[0], use_meson=argp.meson, use_dist=argp.package)
     else:
-        actions[action]()
+        actions[action](args[0], use_meson=argp.meson, use_dist=argp.package)
 
 
 def exit_if_not_argument_is_set(args, action):

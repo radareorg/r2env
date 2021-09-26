@@ -70,12 +70,12 @@ class R2Env:
         self._package_manager.install_package(profile, version, use_meson=use_meson, use_dist=use_dist)
         print_console("[*] Add $HOME/.r2env/bin to your PATH or use 'r2env shell'.")
 
-    def uninstall(self, package):
+    def uninstall(self, package, use_meson, use_dist):
         self.exit_if_r2env_not_initialized()
         if not self._check_package_format(package):
             print_console("[x] Invalid Package format.", level=ERROR)
             return
-        self._package_manager.uninstall_package(package)
+        self._package_manager.uninstall_package(package, use_dist)
 
     def purge(self):
         print("Removing " + self._r2env_path)

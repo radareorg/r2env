@@ -65,22 +65,21 @@ class PackageManager:
             if os.path.isdir(dst_dir):
                 shutil.rmtree(dst_dir)
 
-    def uninstall_package(self, package_name):
+    def uninstall_package(self, package_name, use_dist):
         pkg_found = False
         for package in self.list_installed_packages():
             if package_name == package:
                 pkg_found = True
-                is_distro_package = True
-                if is_distro_package:
+                if use_dist:
                     kv = package.split("@")
-                    print(package)
                     self._uninstall_from_dist(kv[0], kv[1])
-                pkg_dir = os.path.join(os.path.join(self._r2env_path, self.PACKAGES_DIR), package_name)
-                try:
-                    shutil.rmtree(pkg_dir)
-                    print_console("Removed package {}".format(package_name))
-                except OSError as err:
-                    print_console("[x] Unable to remove package {0}. Error: {1}".format(package_name, err), ERROR)
+                else:
+                    pkg_dir = os.path.join(os.path.join(self._r2env_path, self.PACKAGES_DIR), package_name)
+                    try:
+                        shutil.rmtree(pkg_dir)
+                        print_console("Removed package {}".format(package_name))
+                    except OSError as err:
+                        print_console("[x] Unable to remove package {0}. Error: {1}".format(package_name, err), ERROR)
                 break
         if not pkg_found:
             print_console("[x] Unable to find installed package {0}".format(package_name), ERROR)
