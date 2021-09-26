@@ -2,8 +2,11 @@
 
 import os
 import shutil
+import wget
 import sys
 import time
+
+from zipfile import ZipFile
 
 from r2env.tools import load_json_file, git_fetch, git_clean, print_console, ERROR, exit_if_not_exists, host_distname
 
@@ -105,7 +108,8 @@ class PackageManager:
         disturl = self._get_disturl(profile, version, dn)
         pkgname = self._get_pkgname(profile, version, dn)
         ofile = "/".join([self._r2env_path, "src", pkgname])
-        os.system("wget -O " + ofile + " -qc " + disturl)
+        # os.system("wget -O " + ofile + " -qc " + disturl)
+        wget.download(disturl, ofile);
         try:
             sysname = os.uname().sysname
         except:
@@ -115,8 +119,8 @@ class PackageManager:
             if os.system("sudo installer -pkg " + ofile + " -target /") == 0:
                 return True
         if sysname == "Windows":
-            if os.system("unzip " + ofile) == 0:
-                return True
+            with ZipFile(ofile, 'r') as z:
+                z.extractall()
         if sysname == "Linux" and os.path.exists("/usr/bin/dpkg"):
             if os.system("sudo dpkg -i " + ofile) == 0:
                 return True
