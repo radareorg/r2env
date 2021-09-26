@@ -8,6 +8,24 @@
       }
     ]
   },
+  "r2dec": {
+    "source": "https://github.com/wargio/r2dec-js",
+    "versions": [
+      {
+        "id": "git",
+        "packages": {}
+      }
+    ]
+  },
+  "r2ghidra": {
+    "source": "https://github.com/radareorg/r2ghidra",
+    "versions": [
+      {
+        "id": "git",
+        "packages": {}
+      }
+    ]
+  },
   "r0": {
     "source": "https://github.com/radareorg/r0",
     "versions": [

@@ -106,10 +106,10 @@ class R2Env:
             return version.read()
 
     def shell(self, cmd=""):
-        line = "export PS1=\"r2env\\$ \";export PATH=\"" + self._r2env_path + "/bin:$PATH\"; $SHELL -f"
+        line = "export PS1=\"r2env\\$ \";export PKG_CONFIG_PATH=\""+self._r2env_path+"/lib/pkgconfig\";export PATH=\"" + self._r2env_path + "/bin:$PATH\"; $SHELL -f"
         if os.path.isfile("/default.prop"):  # hack for pre-dtag builds of r2
             line = "export LD_LIBRARY_PATH=\"" + self._r2env_path + "/lib\";" + line
-        if of.uname().sysname == "Darwin":
+        if os.uname().sysname == "Darwin":
             line = "export DYLD_LIBRARY_PATH=\"" + self._r2env_path + "/lib\";" + line
         if cmd.strip() == "":
             return os.system(line)
@@ -119,12 +119,16 @@ class R2Env:
     def _load_config():
         filename = os.path.join(os.path.dirname(__file__), 'config', 'config.json')
         config = load_json_file(filename)
+        ep = os.getenv("R2ENV_PATH")
+        if ep is not None:
+            config["r2env_path"] = ep
         if not config:
             sys.exit(-1)
         return config
 
     @staticmethod
     def _get_default_path():
+        # TODO: try to find an .r2env starting in current directory
         return os.path.join(Path.home(), ".r2env")
 
     @staticmethod

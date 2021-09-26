@@ -32,6 +32,10 @@ list           - list all packages available to r2env
 shell          - enter a new shell with PATH env var set
 purge          - remove ~/.r2env
 
+Environment
+
+R2ENV_PATH     - specify different path other than ~/.r2env
+
 """
 
 
@@ -44,12 +48,13 @@ def show_version():
 
 
 actions_with_argument = ["add", "install", "rm", "uninstall"]
-actions_with_arguments = ["shell", "use"]
+actions_with_arguments = ["sh", "shell", "use"]
 actions = {
     "init": R2Env().init,
     "v": show_version,
     "version": show_version,
     "path": R2Env().get_r2_path,
+    "sh": R2Env().shell,
     "shell": R2Env().shell,
     "config": R2Env().show_config,
     "list": R2Env().list_packages,

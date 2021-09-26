@@ -133,28 +133,29 @@ class PackageManager:
         print_console("[-] Cleaning Repo")
         git_clean(source_path)
         if use_meson:
-            return self._build_using_meson(source_path, dst_path, logfile)
-        return self._build_using_acr(source_path, dst_path, logfile)
+            return self._build_using_meson(source_path, dst_path, logfile, self._r2env_path)
+        return self._build_using_acr(source_path, dst_path, logfile, self._r2env_path)
 
     @staticmethod
-    def _build_using_acr(source_path, dst_path, logfile):
+    def _build_using_acr(source_path, dst_path, logfile, r2env_path):
         """Only works in Unix systems"""
         exit_if_not_exists(['make'])
         print_console("[-] Building package using acr...")
         extra_flags = ""
         if os.path.isfile("/default.prop"):
             extra_flags = " --with-compiler=termux"
-        cmd = "(cd {0} && rm -rf shlr/capstone && ./configure {1}" \
+        cmd = "(export PKG_CONFIG_PATH=\"{4}\";cd {0} && rm -rf shlr/capstone && ./configure {1}" \
               " --with-rpath --prefix={2} 2>&1 && make -j4 2>&1" \
-              "&& make install) > {3}".format(source_path, extra_flags, dst_path, logfile)
+              "&& make install) > {3}".format(source_path, extra_flags, dst_path, logfile, r2env_path + "/lib/pkgconfig")
+        print(cmd)
         return os.system(cmd) == 0
 
     @staticmethod
-    def _build_using_meson(source_path, dst_path, logfile):
+    def _build_using_meson(source_path, dst_path, logfile, r2env_path):
         exit_if_not_exists(['meson', 'ninja'])
         print_console("[-] Building package using meson ...")
-        cmd = "(cd {0} && rm -rf build && meson . build --buildtype=release --prefix={1} -Dlocal=true 2>&1" \
-              "&& ninja -C build && ninja -C build install) > {2}".format(source_path, dst_path, logfile)
+        cmd = "(export PKG_CONFIG_PATH=\"{4}\";cd {0} && rm -rf build && meson . build --buildtype=release --prefix={1} -Dlocal=true 2>&1" \
+              "&& ninja -C build && ninja -C build install) > {2}".format(source_path, dst_path, logfile,r2env_path + "/lib/pkgconfig")
         return os.system(cmd) == 0
 
     def _exit_if_package_not_available(self, profile, version):
