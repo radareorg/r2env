@@ -38,17 +38,21 @@ class R2Env:
         print_console("[*] Current r2env config:")
         print_console(json.dumps(self._config))
 
+    def list_packages(self):
+        self.list_available_packages()
+        self.list_installed_packages()
+
     def list_available_packages(self):
-        print_console("[*] List of available Radare packages")
+        print_console("- Available")
         packages = self._package_manager.list_available_packages()
         for profile in packages:
-            print_console("  - {} packages:".format(profile), WARNING)
+            print_console("  - {}:".format(profile), WARNING)
             for version in packages[profile]['versions']:
-                print_console(" {}@{}".format(profile, version['id']), formatter=1)
+                print_console(" - {}@{}".format(profile, version['id']), formatter=1)
 
     def list_installed_packages(self):
         self.exit_if_r2env_not_initialized()
-        print_console("[*] Installed Radare packages")
+        print_console("- Installed")
         for pkg in self._package_manager.list_installed_packages():
             if pkg == self._get_current_version():
                 print_console("  [*] {}".format(pkg))
