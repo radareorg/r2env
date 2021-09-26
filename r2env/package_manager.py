@@ -107,7 +107,7 @@ class PackageManager:
         vdir = "/tmp/prefix-r2"
         sysname = os.uname().sysname
         if sysname == "Darwin":
-            os.system("sudo installer -pkg " + pkgname + " -target " + vdir)
+            os.system("sudo installer -pkg " + pkgname)
         # os.system("pkgutil --volume " + vdir + " " + "radare2-" + version + "-" + dn + ".pkg")
         # TODO: checksum
         return True
@@ -120,7 +120,8 @@ class PackageManager:
             pkgname = "org.radare.radare2"
             os.system("pkgutil --pkg-info " + pkgname)
             os.system("cd / && pkgutil --only-files --files "+pkgname+" | tr '\\n' '\\0' | xargs -n 1 -0 sudo rm -f")
-            os.system("cd / && pkgutil --only-dirs --files "+pkgname+" | tail -r | tr '\\n' '\\0' | xargs -n 1 -0 sudo rmdir")
+            os.system("cd / && pkgutil --only-dirs --files "+pkgname+" | tail -r | tr '\\n' '\\0' | xargs -n 1 -0 sudo rmdir 2>/dev/null")
+            os.system("sudo pkgutil --forget " + pkgname)
         return True
 
     def _build_from_source(self, profile, version, source_path, dst_path, logfile, use_meson=False):
