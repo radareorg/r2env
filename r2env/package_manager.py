@@ -114,7 +114,6 @@ class PackageManager:
         return False
 
     def _uninstall_from_dist(self, profile, version):
-        dn = host_distname()
         print_console("[*] Uninstalling {}@{} package from binary dist".format(profile, version))
         sysname = os.uname().sysname
         if sysname == "Darwin":

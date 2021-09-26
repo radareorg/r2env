@@ -41,7 +41,7 @@ def host_distname():
     if sysname == "Darwin":
         if machine == "x86_64":
             return "mac_x64"
-        elif machine == "arm64":
+        if machine == "arm64":
             return "mac_arm64"
         return None
     if sysname == "Linux":

@@ -95,7 +95,7 @@ def run_action(argp):
 
 def exit_if_not_argument_is_set(args, action):
     if len(args) < 1:
-        if action == "use" or action == "rm" or action == "uninstall":
+        if action in ["use", "rm", "uninstall"]:
             print_console("[x] Package not defined.", ERROR)
             R2Env().list_installed_packages()
         else:
@@ -110,7 +110,7 @@ def main():
                         action="store", nargs="*", default=[])
     #parser.add_argument('args', metavar='args', nargs='+', type=str, help='Specified arguments')
     parser.add_argument("-v", "--version", dest="version", help="Show r2env version", action="store_true")
-    parser.add_argument("-m", "--meson", dest="meson", help="Use meson as your build system (Use acr by default).", action="store_true")
+    parser.add_argument("-m", "--meson", dest="meson", help="Use meson instead of acr to compile", action="store_true")
     parser.add_argument("-p", "--package", dest="package", help="Use binary package for target system if available", action="store_true")
     parser.add_argument("-l", "--list", dest="list", help="List available and installed packages", action="store_true")
     parser.print_help = show_help

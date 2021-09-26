@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import re
 import shutil
 
 import json
@@ -88,7 +87,7 @@ class R2Env:
     def use(self, package=None):
         self.exit_if_r2env_not_initialized()
         if not package:
-            print_console("[x] Package not defined. Please use 'r2env use' with one installed package. ", ERROR)
+            print_console("[x] Package not defined.", ERROR)
             self.list_installed_packages()
             return
         cur_ver = self._get_current_version()
@@ -106,7 +105,9 @@ class R2Env:
             return version.read()
 
     def shell(self, cmd=""):
-        line = "export PS1=\"r2env\\$ \";export PKG_CONFIG_PATH=\""+self._r2env_path+"/lib/pkgconfig\";export PATH=\"" + self._r2env_path + "/bin:$PATH\"; $SHELL -f"
+        line = "export PS1=\"r2env\\$ \";export PKG_CONFIG_PATH=\""
+        line = line + self._r2env_path+"/lib/pkgconfig\";export PATH=\""
+        line = line + self._r2env_path + "/bin:$PATH\"; $SHELL -f"
         if os.path.isfile("/default.prop"):  # hack for pre-dtag builds of r2
             line = "export LD_LIBRARY_PATH=\"" + self._r2env_path + "/lib\";" + line
         if os.uname().sysname == "Darwin":
@@ -133,6 +134,8 @@ class R2Env:
 
     @staticmethod
     def _check_package_format(package):
+        if package == "":
+            return True
         return True
         # regexp = re.compile(r"\w+\d@(?:\d\.\d\.\d|git)")
         # return regexp.match(package)
