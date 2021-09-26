@@ -43,8 +43,8 @@ def show_version():
     print_console(R2Env().version())
 
 
-actions_with_argument = ["add", "install", "rm", "uninstall", "use"]
-actions_with_arguments = ["shell"]
+actions_with_argument = ["add", "install", "rm", "uninstall"]
+actions_with_arguments = ["shell", "use"]
 actions = {
     "init": R2Env().init,
     "v": show_version,
@@ -86,7 +86,7 @@ def run_action(argp):
         exit_if_not_argument_is_set(args, action)
         actions[action](args[0], use_meson=argp.meson, use_dist=argp.package)
     else:
-        actions[action]("", use_meson=argp.meson, use_dist=argp.package)
+        actions[action]()
 
 
 def exit_if_not_argument_is_set(args, action):
@@ -95,8 +95,8 @@ def exit_if_not_argument_is_set(args, action):
             print_console("[x] Package not defined. Please use 'r2env use' with one installed package. ", ERROR)
             R2Env().list_installed_packages()
         else:
-            print_console("[x] Missing package argument. ( as for example: radare2@git)", ERROR)
-        print_console("[x] Missing package argument. ( as for example: radare2@git)", ERROR)
+            print_console("[x] Missing package argument.", ERROR)
+            R2Env().list_available_packages()
         sys.exit(-1)
 
 
