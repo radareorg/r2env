@@ -63,7 +63,7 @@ def git_fetch(url, version, source_path):
         repo.remotes.origin.pull("master")
     else:
         repo = Repo.clone_from(url, source_path)
-    if version != "latest":
+    if version != "git":
         repo.git.checkout(version)
 
 
