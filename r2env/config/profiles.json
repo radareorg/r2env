@@ -3,7 +3,7 @@
     "source": "https://github.com/radareorg/r0",
     "versions": [
       {
-        "id": "latest",
+        "id": "git",
         "packages": {}
       }
     ]
@@ -46,7 +46,7 @@
         }
       },
       {
-        "id": "latest",
+        "id": "git",
         "packages": {}
       }
     ]

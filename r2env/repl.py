@@ -20,16 +20,17 @@ Flags:
 
 Actions:
 
-init               - create .r2env in current directory
+init               - create ~/.r2env directory
 config             - display current .r2env settings
 install   [pkg]    - build and install given package. Use --meson to use it as the build system.
 uninstall [pkg]    - remove selected package
-use [pkg]          - use r2 package defined. pkg should be a release version or latest.
+use [pkg]          - use r2 package defined. pkg should be a release version or git.
 path               - show path of current r2 in use
 version            - show version of r2env
 versions           - List all Radare versions installed
 list               - list all Radare packages available to r2env
 shell              - open a new shell with PATH env var set
+purge              - remove ~/.r2env
 
 """
 
@@ -55,6 +56,7 @@ actions = {
     "installed": R2Env().list_installed_packages,
     "uninstall": R2Env().uninstall,
     "use": R2Env().use,
+    "purge": R2Env().purge,
     "help": show_help
 }
 
@@ -79,7 +81,7 @@ def run_action(argp):
     elif action in actions_with_argument:
         exit_if_not_argument_is_set(args, action)
         if action == "install":
-            actions[action](args[0], use_meson=argp.use_meson)
+            actions[action](args[0], use_meson=argp.meson, use_dist=argp.package)
         else:
             actions[action](args[0])
     else:
@@ -92,8 +94,8 @@ def exit_if_not_argument_is_set(args, action):
             print_console("[x] Package not defined. Please use 'r2env use' with one installed package. ", ERROR)
             R2Env().list_installed_packages()
         else:
-            print_console("[x] Missing package argument. ( as for example: radare2@latest)", ERROR)
-        print_console("[x] Missing package argument. ( as for example: radare2@latest)", ERROR)
+            print_console("[x] Missing package argument. ( as for example: radare2@git)", ERROR)
+        print_console("[x] Missing package argument. ( as for example: radare2@git)", ERROR)
         sys.exit(-1)
 
 

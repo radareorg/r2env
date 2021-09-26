@@ -40,7 +40,7 @@ class PackageManager:
             sys.exit(-1)
         return profiles
 
-    def install_package(self, profile, version, use_meson):
+    def install_package(self, profile, version, use_meson, use_dist):
         log_path = os.path.join(self._r2env_path, self.LOG_DIR)
         logfile = os.path.join(log_path, "{}_{}_{}_build.txt".format(profile, version, round(time.monotonic() * 1000)))
         source_path = os.path.join(os.path.join(self._r2env_path, self.SOURCE_DIR, profile))
@@ -52,8 +52,11 @@ class PackageManager:
         if not os.path.isdir(dst_dir):
             os.makedirs(dst_dir)
         self._exit_if_package_not_available(profile, version)
-        if self._install_from_dist(profile, version, source_path, dst_dir, logfile, use_meson=use_meson):
-            print_console("[*] Binary package {}@{} installed successfully".format(profile, version))
+        if use_dist:
+            if self._install_from_dist(profile, version, source_path, dst_dir, logfile, use_meson=use_meson):
+                print_console("[*] Binary package {}@{} installed successfully".format(profile, version))
+            else:
+                print_console("Error.")
         elif self._build_from_source(profile, version, source_path, dst_dir, logfile, use_meson=use_meson):
             print_console("[*] Package {}@{} installed successfully".format(profile, version))
         else:

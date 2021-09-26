@@ -2,6 +2,7 @@
 
 import os
 import re
+import shutil
 
 import json
 import sys
@@ -48,7 +49,8 @@ class R2Env:
         for profile in packages:
             print_console("  - {}:".format(profile), WARNING)
             for version in packages[profile]['versions']:
-                print_console(" - {}@{}".format(profile, version['id']), formatter=1)
+                dists = ", ".join(version['packages'].keys())
+                print_console(" - {}@{}  - {}".format(profile, version['id'], dists), formatter=1)
 
     def list_installed_packages(self):
         self.exit_if_r2env_not_initialized()
@@ -59,13 +61,13 @@ class R2Env:
             else:
                 print_console("  - {}".format(pkg))
 
-    def install(self, package, use_meson=False):
+    def install(self, package, use_meson=False, use_dist=False):
         self.exit_if_r2env_not_initialized()
         if not self._check_package_format(package):
             print_console("[x] Invalid Package format.", level=ERROR)
             return
         profile, version = package.split('@')
-        self._package_manager.install_package(profile, version, use_meson=use_meson)
+        self._package_manager.install_package(profile, version, use_meson=use_meson, use_dist=use_dist)
         print_console("[*] Magic Done! Remember to add the $HOME/.r2env/bin folder to your PATH.")
 
     def uninstall(self, package):
@@ -74,6 +76,10 @@ class R2Env:
             print_console("[x] Invalid Package format.", level=ERROR)
             return
         self._package_manager.uninstall_package(package)
+
+    def purge(self):
+        print("Removing " + self._r2env_path)
+        shutil.rmtree(self._r2env_path)
 
     def use(self, package=None):
         self.exit_if_r2env_not_initialized()
@@ -101,7 +107,6 @@ class R2Env:
             line = "export LD_LIBRARY_PATH=\"" + self._r2env_path + "/lib\";" + line
         if cmd.strip() == "":
             return os.system(line)
-        print(os.system(line + " -c '" + cmd + "'"))
         return os.system(line + " -c '" + cmd + "'")
 
     @staticmethod
@@ -118,7 +123,7 @@ class R2Env:
 
     @staticmethod
     def _check_package_format(package):
-        regexp = re.compile(r"\w+\d@(?:\d\.\d\.\d|latest)")
+        regexp = re.compile(r"\w+\d@(?:\d\.\d\.\d|git)")
         return regexp.match(package)
 
     def _get_current_version(self):
