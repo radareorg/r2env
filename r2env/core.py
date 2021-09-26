@@ -64,7 +64,7 @@ class R2Env:
     def install(self, package, use_meson=False, use_dist=False):
         self.exit_if_r2env_not_initialized()
         if not self._check_package_format(package):
-            print_console("[x] Invalid Package format.", level=ERROR)
+            print_console("[x] Invalid package format.", level=ERROR)
             return
         profile, version = package.split('@')
         self._package_manager.install_package(profile, version, use_meson=use_meson, use_dist=use_dist)
@@ -73,7 +73,7 @@ class R2Env:
     def uninstall(self, package, use_meson, use_dist):
         self.exit_if_r2env_not_initialized()
         if not self._check_package_format(package):
-            print_console("[x] Invalid Package format.", level=ERROR)
+            print_console("[x] Invalid package format.", level=ERROR)
             return
         self._package_manager.uninstall_package(package, use_dist)
 
@@ -123,8 +123,9 @@ class R2Env:
 
     @staticmethod
     def _check_package_format(package):
-        regexp = re.compile(r"\w+\d@(?:\d\.\d\.\d|git)")
-        return regexp.match(package)
+        return True
+        # regexp = re.compile(r"\w+\d@(?:\d\.\d\.\d|git)")
+        # return regexp.match(package)
 
     def _get_current_version(self):
         version_file = os.path.join(self._r2env_path, self.VERSION_FILE)

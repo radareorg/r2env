@@ -43,7 +43,7 @@ def show_version():
     print_console(R2Env().version())
 
 
-actions_with_argument = ["install", "uninstall", "use"]
+actions_with_argument = ["add", "install", "rm", "uninstall", "use"]
 actions_with_arguments = ["shell"]
 actions = {
     "init": R2Env().init,
@@ -86,7 +86,7 @@ def run_action(argp):
         exit_if_not_argument_is_set(args, action)
         actions[action](args[0], use_meson=argp.meson, use_dist=argp.package)
     else:
-        actions[action](args[0], use_meson=argp.meson, use_dist=argp.package)
+        actions[action]("", use_meson=argp.meson, use_dist=argp.package)
 
 
 def exit_if_not_argument_is_set(args, action):

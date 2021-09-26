@@ -1,4 +1,13 @@
 {
+  "r2frida": {
+    "source": "https://github.com/nowsecure/r2frida",
+    "versions": [
+      {
+        "id": "git",
+        "packages": {}
+      }
+    ]
+  },
   "r0": {
     "source": "https://github.com/radareorg/r0",
     "versions": [

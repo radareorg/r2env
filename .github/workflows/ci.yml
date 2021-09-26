@@ -47,11 +47,13 @@ jobs:
     - name: Install r2 using r2env
       run: |
         r2env init
+        [ "`r2env | wc -l`" -gt 10 ] # measure help message
         r2env install radare2@git
     - name: Execute git version of r2
       run: |
         r2env use radare2@git
         $HOME/.r2env/bin/r2 -v
+        r2env shell "r2 -v"
     - name: Uninstalling
       run: sudo pip uninstall -y r2env && rm -rf $HOME/.r2env
   release-job:
