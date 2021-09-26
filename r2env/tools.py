@@ -19,6 +19,9 @@ def print_console(msg, level=INFO, formatter=0):
     tabs, color = ["", ""]
     for _ in range(formatter):
         tabs += "    "
+    if os.name == 'nt':
+        print(tabs + msg)
+        return
     if level == ERROR:
         color = Fore.RED
     elif level == WARNING:
