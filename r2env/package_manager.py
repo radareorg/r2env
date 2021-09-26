@@ -107,13 +107,12 @@ class PackageManager:
         pkgname = self._get_pkgname(profile, version, dn)
         print(disturl)
         os.system("wget -c " + disturl)
-        vdir = "/tmp/prefix-r2"
         sysname = os.uname().sysname
         if sysname == "Darwin":
-            os.system("sudo installer -pkg " + pkgname)
-        # os.system("pkgutil --volume " + vdir + " " + "radare2-" + version + "-" + dn + ".pkg")
+            if os.system("sudo installer -pkg " + pkgname + " -target /") == 0:
+                return True
         # TODO: checksum
-        return True
+        return False
 
     def _uninstall_from_dist(self, profile, version):
         dn = host_distname()

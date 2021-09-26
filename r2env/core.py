@@ -57,7 +57,7 @@ class R2Env:
         print_console("- Installed")
         for pkg in self._package_manager.list_installed_packages():
             if pkg == self._get_current_version():
-                print_console("  [*] {}".format(pkg))
+                print_console("  - {} (in use)".format(pkg))
             else:
                 print_console("  - {}".format(pkg))
 
@@ -68,7 +68,7 @@ class R2Env:
             return
         profile, version = package.split('@')
         self._package_manager.install_package(profile, version, use_meson=use_meson, use_dist=use_dist)
-        print_console("[*] Magic Done! Remember to add the $HOME/.r2env/bin folder to your PATH.")
+        print_console("[*] Add $HOME/.r2env/bin to your PATH or use 'r2env shell'.")
 
     def uninstall(self, package):
         self.exit_if_r2env_not_initialized()
