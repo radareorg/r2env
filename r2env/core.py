@@ -105,6 +105,8 @@ class R2Env:
         line = "export PS1=\"r2env\\$ \";export PATH=\"" + self._r2env_path + "/bin:$PATH\"; $SHELL -f"
         if os.path.isfile("/default.prop"):  # hack for pre-dtag builds of r2
             line = "export LD_LIBRARY_PATH=\"" + self._r2env_path + "/lib\";" + line
+        if of.uname().sysname == "Darwin":
+            line = "export DYLD_LIBRARY_PATH=\"" + self._r2env_path + "/lib\";" + line
         if cmd.strip() == "":
             return os.system(line)
         return os.system(line + " -c '" + cmd + "'")
