@@ -106,10 +106,16 @@ class PackageManager:
         pkgname = self._get_pkgname(profile, version, dn)
         ofile = "/".join([self._r2env_path, "src", pkgname])
         os.system("wget -O " + ofile + " -qc " + disturl)
-        sysname = os.uname().sysname
+        try:
+            sysname = os.uname().sysname
+        except:
+            sysname = "Windows"
         # TODO: checksum
         if sysname == "Darwin":
             if os.system("sudo installer -pkg " + ofile + " -target /") == 0:
+                return True
+        if sysname == "Windows":
+            if os.system("unzip " + ofile) == 0:
                 return True
         if sysname == "Linux" and os.path.exists("/usr/bin/dpkg"):
             if os.system("sudo dpkg -i " + ofile) == 0:
@@ -118,7 +124,10 @@ class PackageManager:
 
     def _uninstall_from_dist(self, profile, version):
         print_console("[*] Uninstalling {}@{} package from binary dist".format(profile, version))
-        sysname = os.uname().sysname
+        try:
+            sysname = os.uname().sysname
+        except:
+            sysname = "Windows"
         if sysname == "Darwin":
             pkgname = "org.radare.radare2"
             os.system("pkgutil --pkg-info " + pkgname)
