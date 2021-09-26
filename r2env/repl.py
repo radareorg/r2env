@@ -12,27 +12,27 @@ Usage: r2env [-flags] [action] [args...]
 
 Flags:
 
--h, --help     - show this help
--v, --version  - display r2env version
--m, --meson    - use meson instead of acr
--p, --package  - install the dist package instead of building
--l, --list     - list available and installed packages
+  -h, --help    - show this help.
+  -v, --version - display r2env version.
+  -m, --meson   - use meson instead of acr.
+  -p, --package - install the dist package instead of building
+  -l, --list    - list available and installed packages
 
 Actions:
 
-init           - create ~/.r2env directory
-config         - display current .r2env settings
-add [pkg]      - build and install given package. See -p and -m
-use [pkg]      - use r2 package defined. pkg should be a release version or git.
-rm [pkg]       - remove package from ~/.r2env
-path           - show path of current r2 in use
-list           - list all packages available to r2env
-shell          - enter a new shell with PATH env var set
-purge          - remove ~/.r2env
+  init          - create ~/.r2env directory.
+  config        - display current .r2env settings.
+  add [pkg]     - build and install given package. See -p and -m
+  use [pkg]     - stow a specific version to be the default.
+  rm [pkg]      - remove package from ~/.r2env
+  path          - show path of current r2 in use.
+  list          - list all packages available to r2env.
+  shell         - enter a new shell with PATH env var set.
+  purge         - remove ~/.r2env
 
 Environment
 
-R2ENV_PATH     - specify different path other than ~/.r2env
+  R2ENV_PATH    - specify different path other than ~/.r2env
 
 """
 
