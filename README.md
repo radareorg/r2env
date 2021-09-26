@@ -11,9 +11,13 @@ and plugins, make it easy to switch between them.
 
 ## Installation
 
-r2env is available via PIP. (`pip install r2env`)
+r2env is available via PIP.
 
-If you want to try it directly from git just run `make`.
+* `pip install -U -f r2env`
+
+If you want to try it directly from source.
+
+* `pip install .`
 
 ## Usage
 
