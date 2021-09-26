@@ -105,11 +105,16 @@ class PackageManager:
         disturl = self._get_disturl(profile, version, dn)
         pkgname = self._get_pkgname(profile, version, dn)
         print(disturl)
-        os.system("wget -c " + disturl)
+        os.system("wget -qc " + disturl)
         sysname = os.uname().sysname
         if sysname == "Darwin":
             if os.system("sudo installer -pkg " + pkgname + " -target /") == 0:
                 return True
+        if sysname == "Linux" and os.path.exists("/usr/bin/dpkg"):
+            if os.system("sudo dpkg -i " + pkgname) == 0:
+                return True
+       
+       
         # TODO: checksum
         return False
 
@@ -122,6 +127,13 @@ class PackageManager:
             os.system("cd / && pkgutil --only-files --files "+pkgname+" | tr '\\n' '\\0' | xargs -n 1 -0 sudo rm -f")
             os.system("cd / && pkgutil --only-dirs --files "+pkgname+" | tail -r | tr '\\n' '\\0' | xargs -n 1 -0 sudo rmdir 2>/dev/null")
             os.system("sudo pkgutil --forget " + pkgname)
+        if sysname == "Linux" and os.path.exists("/usr/bin/dpkg"):
+            try:
+                pkgname = profile.split("@")[0]
+            except:
+                pkgname = profile
+            if os.system("sudo dpkg -r " + pkgname) == 0:
+                return True
         return True
 
     def _build_from_source(self, profile, version, source_path, dst_path, logfile, use_meson=False):
