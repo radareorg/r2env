@@ -20,7 +20,11 @@ If you want to try it directly from git just run `make`.
 Usage
 -----
 
-First of all you may want to initialize the `.r2env` directory somewhere with `cd .. ; r2env init`.
+First we need to initialize the working directory:
+
+```
+r2env init
+```
 
 Listing available packages is done via `r2env list`.
 
@@ -29,11 +33,10 @@ Source packages are managed with the `add`, `rm`, `use` and `unused`.
 For example: Installing radare2 (assumes @git version)
 
 ```
-cd /tmp
 r2env init
 r2env add radare2
 r2env use radare2@git
-r2env shell r2 -v
+r2env shell "r2 -v"
 ```
 
 r2pm vs r2env

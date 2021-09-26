@@ -42,12 +42,14 @@ jobs:
       uses: actions/checkout@v2
     - name: Install
       run: sudo pip install . --force-reinstall
+    - name: Initializing
+      run: r2env init
     - name: Execute r2env
       run: r2env list
     - name: Install r2 using r2env
       run: |
-        r2env init
         [ "`r2env | wc -l`" -gt 10 ] # measure help message
+        [ "`r2env -l | wc -l`" -gt 6 ] # measure pkgs
         r2env install radare2@git
     - name: Execute git version of r2
       run: |
