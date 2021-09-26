@@ -26,8 +26,6 @@ add [pkg]      - build and install given package. See -p and -m
 use [pkg]      - use r2 package defined. pkg should be a release version or git.
 rm [pkg]       - remove package from ~/.r2env
 path           - show path of current r2 in use
-version        - show version of r2env
-versions       - list installed packages
 list           - list all packages available to r2env
 shell          - enter a new shell with PATH env var set
 purge          - remove ~/.r2env
@@ -57,6 +55,7 @@ actions = {
     "sh": R2Env().shell,
     "shell": R2Env().shell,
     "config": R2Env().show_config,
+    "ls": R2Env().list_packages,
     "list": R2Env().list_packages,
     "add": R2Env().install,
     "install": R2Env().install,

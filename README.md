@@ -1,5 +1,4 @@
-r2env
-=====
+# r2env
 
 [![CI](https://github.com/radareorg/r2env/actions/workflows/ci.yml/badge.svg)](https://github.com/radareorg/r2env/actions/workflows/ci.yml)
 
@@ -10,15 +9,13 @@ and plugins, make it easy to switch between them.
 * 
 
 
-Installation
-------------
+## Installation
 
 r2env is available via PIP. (`pip install r2env`)
 
 If you want to try it directly from git just run `make`.
 
-Usage
------
+## Usage
 
 First we need to initialize the working directory:
 
@@ -39,8 +36,40 @@ r2env use radare2@git
 r2env shell "r2 -v"
 ```
 
-r2pm vs r2env
--------------
+## Help
+
+```
+Usage: r2env [-flags] [action] [args...]
+
+Flags:
+
+-h, --help     - show this help
+-v, --version  - display r2env version
+-m, --meson    - use meson instead of acr
+-p, --package  - install the dist package instead of building
+-l, --list     - list available and installed packages
+
+Actions:
+
+init           - create ~/.r2env directory
+config         - display current .r2env settings
+add [pkg]      - build and install given package. See -p and -m
+use [pkg]      - use r2 package defined. pkg should be a release version or git.
+rm [pkg]       - remove package from ~/.r2env
+path           - show path of current r2 in use
+version        - show version of r2env
+versions       - list installed packages
+list           - list all packages available to r2env
+shell          - enter a new shell with PATH env var set
+purge          - remove ~/.r2env
+
+Environment
+
+R2ENV_PATH     - specify different path other than ~/.r2env
+
+```
+
+## r2pm vs r2env
 
 r2env aims to provide a packaging for r2 with support for binary packages and for all major platforms.
 
