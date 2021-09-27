@@ -137,6 +137,10 @@ class PackageManager:
         if sysname == "Linux" and os.path.exists("/usr/bin/dpkg"):
             if os.system("sudo dpkg -i " + ofile) == 0:
                 return True
+        if os.path.isfile("/default.prop"): # termux
+            if os.system("apt install radare2") == 0:
+                return True
+            return False
         return False
 
     def _uninstall_from_dist(self, profile, version):
@@ -158,6 +162,10 @@ class PackageManager:
                 pkgname = profile
             if os.system("sudo dpkg -r " + pkgname) == 0:
                 return True
+        if os.path.isfile("/default.prop"): # termux
+            if os.system("sudo dpkg -r radare2") == 0:
+                return True
+            return False
         return True
 
     def _build_from_source(self, profile, version, source_path, dst_path, logfile, use_meson=False):
