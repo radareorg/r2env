@@ -72,6 +72,10 @@ def git_fetch(url, version, source_path):
         repo = Repo.clone_from(url, source_path)
     if version != "git":
         repo.git.checkout(version)
+    sms = repo.submodules
+    for sm in sms:
+        if not sm.module_exists():
+            sm.update()
 
 
 def git_clean(source_path):
