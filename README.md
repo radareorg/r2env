@@ -6,8 +6,6 @@ Create self-contained environments with multiple versions of radare2
 and plugins, make it easy to switch between them.
 
 * Build from source or install the system package if available.
-* 
-
 
 ## Installation
 
