@@ -23,16 +23,16 @@ class R2Env:
 
     def init(self):
         if os.path.isdir(self._r2env_path):
-            print_console("[x] r2env already initialized. Path {} already exists.".format(self._r2env_path), ERROR)
+            print_console(f"[x] r2env already initialized. Path {self._r2env_path} already exists.", ERROR)
             return
         os.mkdir(self._r2env_path)
-        print_console("[*] r2env initialized at {}".format(self._r2env_path))
+        print_console(f"[*] r2env initialized at {self._r2env_path}")
 
     def get_r2_path(self):
         self.exit_if_r2env_not_initialized()
         r2_version = self._get_current_version()
         r2_path = self._package_manager.get_package_path(r2_version) if r2_version else "Radare package not configured"
-        print_console(" [*] {0} ({1})".format(r2_version, r2_path))
+        print_console(f" [*] {r2_version} ({r2_path})")
 
     def show_config(self):
         print_console("[*] Current r2env config:")
@@ -46,19 +46,19 @@ class R2Env:
         print_console("- Available")
         packages = self._package_manager.list_available_packages()
         for profile in packages:
-            print_console("  - {}:".format(profile), WARNING)
+            print_console(f"  - {profile}:", WARNING)
             for version in packages[profile]['versions']:
                 dists = ", ".join(version['packages'].keys())
-                print_console(" - {}@{}  - {}".format(profile, version['id'], dists), formatter=1)
+                print_console(f" - {profile}@{version['id']}  - {dists}", formatter=1)
 
     def list_installed_packages(self):
         self.exit_if_r2env_not_initialized()
         print_console("- Installed")
         for pkg in self._package_manager.list_installed_packages():
             if pkg == self._get_current_version():
-                print_console("  - {} (in use)".format(pkg))
+                print_console(f"  - {pkg} (in use)")
             else:
-                print_console("  - {}".format(pkg))
+                print_console(f"  - {pkg}")
 
     def install(self, package, use_meson=False, use_dist=False):
         self.exit_if_r2env_not_initialized()
@@ -67,7 +67,7 @@ class R2Env:
             return
         try:
             profile, version = package.split('@')
-        except:
+        except Exception:
             profile = package
             version = "git"
         self._package_manager.install_package(profile, version, use_meson=use_meson, use_dist=use_dist)
@@ -81,7 +81,7 @@ class R2Env:
         self._package_manager.uninstall_package(package, use_dist)
 
     def purge(self):
-        print("Removing " + self._r2env_path)
+        print_console(f"[*] Removing {self._r2env_path}")
         shutil.rmtree(self._r2env_path)
 
     def use(self, package=None):
@@ -96,20 +96,20 @@ class R2Env:
             unstow([self._package_manager.get_package_path(cur_ver)], self._r2env_path)
         stow([new_dst_dir], self._r2env_path)
         self._set_current_version(package)
-        print_console("[*] Using {} package".format(package))
+        print_console(f"[*] Using {package} package")
 
     @staticmethod
     def version():
         thispath = os.path.dirname(os.path.realpath(__file__))
-        with open(thispath + "/version.txt", "r") as version:
+        with open(thispath + "/version.txt", "r", encoding="utf-8") as version:
             return version.read()
 
     def shell(self, cmd=""):
-        if os.name== "nt":
-            os.system("set PATH="+self._r2env_path+"\\bin;%PATH% && cmd")
+        if os.name == "nt":
+            os.system("set PATH=" + self._r2env_path + "\\bin;%PATH% && cmd")
             return True
         line = "export PS1=\"r2env\\$ \";export PKG_CONFIG_PATH=\""
-        line = line + self._r2env_path+"/lib/pkgconfig\";export PATH=\""
+        line = line + self._r2env_path + "/lib/pkgconfig\";export PATH=\""
         line = line + self._r2env_path + "/bin:$PATH\"; $SHELL -f"
         if os.path.isfile("/default.prop"):  # hack for pre-dtag builds of r2
             line = "export LD_LIBRARY_PATH=\"" + self._r2env_path + "/lib\";" + line
@@ -147,13 +147,13 @@ class R2Env:
         version_file = os.path.join(self._r2env_path, self.VERSION_FILE)
         if not os.path.isfile(version_file):
             return ''
-        with open(version_file, 'r') as file_desc:
+        with open(version_file, 'r', encoding="utf-8") as file_desc:
             version = file_desc.read()
         return version
 
     def _set_current_version(self, package):
         version_file = os.path.join(self._r2env_path, self.VERSION_FILE)
-        with open(version_file, 'w') as file_desc:
+        with open(version_file, 'w', encoding="utf-8") as file_desc:
             file_desc.write(package)
 
     def exit_if_r2env_not_initialized(self):

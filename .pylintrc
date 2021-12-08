@@ -4,6 +4,8 @@ disable=
     C0116, # Missing function or method docstring (missing-function-docstring)
     C0115, # Missing class docstring (missing-class-docstring)
     R0913, # Too many arguments (7/5) (too-many-arguments)
+    W0511, # TODO (fixme)
+    C0103, # invalid-name
 
 [FORMAT]
 max-line-length=120
