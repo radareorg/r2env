@@ -42,7 +42,7 @@ def host_distname():
     try:
         sysname = os.uname().sysname
         machine = os.uname().machine
-    except:
+    except Exception:
         sysname = "w64"
         machine = "amd64"
     if sysname == "Darwin":
@@ -96,8 +96,8 @@ def exit_if_not_exists(tools):
 
 def load_json_file(filepath):
     try:
-        with open(filepath) as json_file:
+        with open(filepath, encoding="utf-8") as json_file:
             return json.load(json_file)
     except OSError as err:
-        print_console("File {} not found. Msg: {}".format(filepath, err), ERROR)
+        print_console(f"File {filepath} not found. Msg: {err}", ERROR)
         return None

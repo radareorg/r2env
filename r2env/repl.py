@@ -108,7 +108,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("args", help="run specified action. (Run r2env help for more information)",
                         action="store", nargs="*", default=[])
-    #parser.add_argument('args', metavar='args', nargs='+', type=str, help='Specified arguments')
+    # parser.add_argument('args', metavar='args', nargs='+', type=str, help='Specified arguments')
     parser.add_argument("-v", "--version", dest="version", help="Show r2env version", action="store_true")
     parser.add_argument("-m", "--meson", dest="meson", help="Use meson instead of acr to compile", action="store_true")
     parser.add_argument("-p", "--package", dest="package", help="Use binary package for target system if available", action="store_true")
