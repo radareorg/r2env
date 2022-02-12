@@ -39,8 +39,7 @@ class REPL:
     """
 
     def __init__(self):
-        self.actions_with_argument = ["add", "install", "rm", "uninstall"]
-        self.actions_with_arguments = ["sh", "shell", "use"]
+        self.actions_with_arguments = ["add", "install", "rm", "uninstall", "use", "sh", "shell"]
         self._core = R2Env()
         self.actions = {
             "init": self._core.init,
@@ -67,9 +66,9 @@ class REPL:
         print_console(self.HELP_MESSAGE)
 
     def run_action(self, action_args):
-        action = ""
         args = []
-        if not action_args or len(action_args) == 0:
+        if not action_args or len(action_args.args) == 0:
+            self.show_help()
             raise ActionException("No action selected")
         if action_args.version:
             self.actions["version"]()
@@ -77,23 +76,19 @@ class REPL:
         if action_args.list:
             list_method = self.actions["list"]
             list_method()
-        if len(action_args) > 1:
+        if len(action_args.args) > 1:
             args = action_args.args[1:]
         action = action_args.args[0]
-        if len(args) < 1 and action in self.actions_with_argument:
+        if len(args) < 1 and action in self.actions_with_arguments:
+            if action in ["add", "install"]:
+                self._core.list_packages()
             if action in ["use", "rm", "uninstall"]:
-                R2Env().list_installed_packages()
-                raise ActionException(f"Action {action} requires a package as an argument.")
-            raise ActionException(f"Action {action} requires arguments")
-        if action == "":
-            self.show_help()
+                self._core.list_installed_packages()
+            raise ActionException(f"Action {action} requires a package as an argument.")
         elif action not in self.actions:
             raise ActionException("Invalid action selected")
         elif action in self.actions_with_arguments:
-            self.actions[action](" ".join(args))
-        elif action in self.actions_with_argument:
-            self.exit_if_not_argument_is_set(args, action)
-            self.actions[action](args[0], use_meson=argp.meson, use_dist=argp.package)
+            self.actions[action](args[0], use_meson=action_args.meson, use_dist=action_args.package)
         else:
             self.actions[action]()
 
