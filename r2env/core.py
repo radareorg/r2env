@@ -6,9 +6,13 @@ import shutil
 import json
 import sys
 from pathlib import Path
+import re
+
 from dploy import stow, unstow
+
+from r2env.exceptions import r2EnvException
 from r2env.package_manager import PackageManager
-from r2env.tools import print_console, load_json_file, WARNING, ERROR
+from r2env.tools import print_console, load_json_file, WARNING, ERROR, host_platform
 
 
 class R2Env:
@@ -29,7 +33,7 @@ class R2Env:
         print_console(f"[*] r2env initialized at {self._r2env_path}")
 
     def get_r2_path(self):
-        self.exit_if_r2env_not_initialized()
+        self.check_if_r2env_initialized()
         r2_version = self._get_current_version()
         r2_path = self._package_manager.get_package_path(r2_version) if r2_version else "Radare package not configured"
         print_console(f" [*] {r2_version} ({r2_path})")
@@ -52,7 +56,7 @@ class R2Env:
                 print_console(f" - {profile}@{version['id']}  - {dists}", formatter=1)
 
     def list_installed_packages(self):
-        self.exit_if_r2env_not_initialized()
+        self.check_if_r2env_initialized()
         print_console("- Installed")
         for pkg in self._package_manager.list_installed_packages():
             if pkg == self._get_current_version():
@@ -60,24 +64,25 @@ class R2Env:
             else:
                 print_console(f"  - {pkg}")
 
-    def install(self, package, use_meson=False, use_dist=False):
-        self.exit_if_r2env_not_initialized()
+    def install(self, package, **kwargs):
+        self.check_if_r2env_initialized()
+        use_meson = kwargs["use_meson"] if "use_meson" in kwargs else False
+        use_dist = kwargs["use_dist"] if "use_dist" in kwargs else False
         if not self._check_package_format(package):
-            print_console("[x] Invalid package format.", level=ERROR)
-            return
+            raise r2EnvException("[x] Invalid package format.")
         try:
             profile, version = package.split('@')
-        except Exception:
+        except ValueError:
             profile = package
             version = "git"
         self._package_manager.install_package(profile, version, use_meson=use_meson, use_dist=use_dist)
         print_console("[*] Add $HOME/.r2env/bin to your PATH or use 'r2env shell'.")
 
-    def uninstall(self, package, use_meson, use_dist):
-        self.exit_if_r2env_not_initialized()
+    def uninstall(self, package, **kwargs):
+        self.check_if_r2env_initialized()
+        use_dist = kwargs["use_dist"] if "use_dist" in kwargs else False
         if not self._check_package_format(package):
-            print_console("[x] Invalid package format.", level=ERROR)
-            return
+            raise r2EnvException("[x] Invalid package format.")
         self._package_manager.uninstall_package(package, use_dist)
 
     def purge(self):
@@ -85,11 +90,10 @@ class R2Env:
         shutil.rmtree(self._r2env_path)
 
     def use(self, package=None):
-        self.exit_if_r2env_not_initialized()
+        self.check_if_r2env_initialized()
         if not package:
-            print_console("[x] Package not defined.", ERROR)
             self.list_installed_packages()
-            return
+            raise r2EnvException("[x] Package not defined.")
         cur_ver = self._get_current_version()
         new_dst_dir = self._package_manager.get_package_path(package)
         if cur_ver:
@@ -105,15 +109,15 @@ class R2Env:
             return version.read()
 
     def shell(self, cmd=""):
-        if os.name == "nt":
+        if host_platform() == "windows":
             os.system("set PATH=" + self._r2env_path + "\\bin;%PATH% && cmd")
             return True
         line = "export PS1=\"r2env\\$ \";export PKG_CONFIG_PATH=\""
         line = line + self._r2env_path + "/lib/pkgconfig\";export PATH=\""
         line = line + self._r2env_path + "/bin:$PATH\"; $SHELL -f"
-        if os.path.isfile("/default.prop"):  # hack for pre-dtag builds of r2
+        if host_platform() == "android":  # hack for pre-dtag builds of r2
             line = "export LD_LIBRARY_PATH=\"" + self._r2env_path + "/lib\";" + line
-        if os.uname().sysname == "Darwin":
+        if host_platform() == "osx":
             line = "export DYLD_LIBRARY_PATH=\"" + self._r2env_path + "/lib\";" + line
         if cmd.strip() == "":
             return os.system(line)
@@ -137,11 +141,10 @@ class R2Env:
 
     @staticmethod
     def _check_package_format(package):
-        if package == "":
-            return True
-        return True
-        # regexp = re.compile(r"\w+\d@(?:\d\.\d\.\d|git)")
-        # return regexp.match(package)
+        regexp = r"[a-z0-9]+@(\d\.\d\.\d|git)"
+        if not package:
+            return False
+        return re.search(regexp, package) is not None
 
     def _get_current_version(self):
         version_file = os.path.join(self._r2env_path, self.VERSION_FILE)
@@ -156,7 +159,6 @@ class R2Env:
         with open(version_file, 'w', encoding="utf-8") as file_desc:
             file_desc.write(package)
 
-    def exit_if_r2env_not_initialized(self):
+    def check_if_r2env_initialized(self):
         if not os.path.isdir(self._r2env_path):
-            print_console("Not r2env initialized. Execute 'r2env init' first.", ERROR)
-            sys.exit(-1)
+            raise r2EnvException("Not r2env initialized. Execute 'r2env init' first.")

@@ -109,6 +109,9 @@ def main():
     except ActionException as err:
         print_console(err.msg, level=ERROR)
         sys.exit(-1)
+    except Exception as err:
+        print_console(f"A generic error occured. Error: {err.msg}", level=ERROR)
+        sys.exit(-1)
 
 
 if __name__ == "__main__":
