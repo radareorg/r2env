@@ -222,3 +222,63 @@ class TestCore(unittest.TestCase):
             r2env.use()
         mock_list_pkg.assert_called_once()
 
+
+    @patch("r2env.core.PackageManager")
+    @patch("r2env.core.os.path.join")
+    @patch("r2env.core.host_platform")
+    @patch("r2env.core.os.system")
+    @patch("r2env.core.load_json_file")
+    def test_shell_windows(self, mock_load_json_file, mock_system, mock_host_platform, mock_join, _):
+        def side_effect(path1, path2, *args):
+            return f"{path1}\\{path2}"
+        r2env_path = "c:\\windows\\temp\\r2env\\"
+        mock_join.side_effect = side_effect
+        mock_host_platform.return_value = "windows"
+        mock_load_json_file.return_value = {"r2env_path": r2env_path}
+        cmd = "r2 -v"
+        R2Env().shell(cmd)
+        mock_system.assert_called_with(f"set PATH={r2env_path}\\bin;%PATH% && cmd")
+
+    @patch("r2env.core.host_platform")
+    @patch("r2env.core.os.system")
+    @patch("r2env.core.load_json_file")
+    def test_shell_android(self, mock_load_json_file, mock_system, mock_host_platform):
+        mock_host_platform.return_value = "android"
+        r2env_path = "/tmp/r2env"
+        mock_load_json_file.return_value = {"r2env_path": r2env_path}
+        cmd = "r2 -v"
+        R2Env().shell(cmd)
+        mock_system.assert_called_with(f"export LD_LIBRARY_PATH=\"{r2env_path}/lib\";"
+                                       f"export PS1=\"r2env\\$ \";"
+                                       f"export PKG_CONFIG_PATH=\"{r2env_path}/lib/pkgconfig\";"
+                                       f"export PATH=\"{r2env_path}/bin:$PATH\";"
+                                       f"$SHELL -f -c \'{cmd}\'")
+
+    @patch("r2env.core.host_platform")
+    @patch("r2env.core.os.system")
+    @patch("r2env.core.load_json_file")
+    def test_shell_osx(self, mock_load_json_file, mock_system, mock_host_platform):
+        mock_host_platform.return_value = "osx"
+        r2env_path = "/tmp/r2env"
+        mock_load_json_file.return_value = {"r2env_path": r2env_path}
+        cmd = "r2 -v"
+        R2Env().shell(cmd)
+        mock_system.assert_called_with(f"export DYLD_LIBRARY_PATH=\"{r2env_path}/lib\";"
+                                       f"export PS1=\"r2env\\$ \";"
+                                       f"export PKG_CONFIG_PATH=\"{r2env_path}/lib/pkgconfig\";"
+                                       f"export PATH=\"{r2env_path}/bin:$PATH\";"
+                                       f"$SHELL -f -c \'{cmd}\'")
+
+    @patch("r2env.core.host_platform")
+    @patch("r2env.core.os.system")
+    @patch("r2env.core.load_json_file")
+    def test_shell_linux(self, mock_load_json_file, mock_system, mock_host_platform):
+        mock_host_platform.return_value = "linux"
+        r2env_path = "/tmp/r2env"
+        mock_load_json_file.return_value = {"r2env_path": r2env_path}
+        cmd = "r2 -v"
+        R2Env().shell(cmd)
+        mock_system.assert_called_with(f"export PS1=\"r2env\\$ \";"
+                                       f"export PKG_CONFIG_PATH=\"{r2env_path}/lib/pkgconfig\";"
+                                       f"export PATH=\"{r2env_path}/bin:$PATH\";"
+                                       f"$SHELL -f -c \'{cmd}\'")

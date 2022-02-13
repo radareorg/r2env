@@ -109,29 +109,36 @@ class R2Env:
             return version.read()
 
     def shell(self, cmd=""):
+        bin_path = os.path.join(self._r2env_path, "bin")
         if host_platform() == "windows":
-            os.system("set PATH=" + self._r2env_path + "\\bin;%PATH% && cmd")
+            os.system(f"set PATH={bin_path};%PATH% && cmd")
             return True
-        line = "export PS1=\"r2env\\$ \";export PKG_CONFIG_PATH=\""
-        line = line + self._r2env_path + "/lib/pkgconfig\";export PATH=\""
-        line = line + self._r2env_path + "/bin:$PATH\"; $SHELL -f"
+        pkgconfig_path = os.path.join(self._r2env_path, "lib", "pkgconfig")
+        bin_path = os.path.join(self._r2env_path, "bin")
+        export_ps1 = "export PS1=\"r2env\\$ \";"
+        export_pkg_config = f"export PKG_CONFIG_PATH=\"{pkgconfig_path}\";"
+        export_path = f"export PATH=\"{bin_path}:$PATH\";"
+        cmd_shell = "$SHELL -f"
+        full_cmd = export_ps1 + export_pkg_config + export_path + cmd_shell
         if host_platform() == "android":  # hack for pre-dtag builds of r2
-            line = "export LD_LIBRARY_PATH=\"" + self._r2env_path + "/lib\";" + line
+            library_path = os.path.join(self._r2env_path, "lib")
+            full_cmd = f"export LD_LIBRARY_PATH=\"{library_path}\";" + full_cmd
         if host_platform() == "osx":
-            line = "export DYLD_LIBRARY_PATH=\"" + self._r2env_path + "/lib\";" + line
+            library_path = os.path.join(self._r2env_path, "lib")
+            full_cmd = f"export DYLD_LIBRARY_PATH=\"{library_path}\";" + full_cmd
         if cmd.strip() == "":
-            return os.system(line)
-        return os.system(line + " -c '" + cmd + "'")
+            return os.system(full_cmd)
+        return os.system(full_cmd + " -c '" + cmd + "'")
 
     @staticmethod
     def _load_config():
         filename = os.path.join(os.path.dirname(__file__), 'config', 'config.json')
         config = load_json_file(filename)
-        ep = os.getenv("R2ENV_PATH")
-        if ep is not None:
-            config["r2env_path"] = ep
+        environment_path = os.getenv("R2ENV_PATH")
+        if environment_path is not None:
+            config["r2env_path"] = environment_path
         if not config:
-            sys.exit(-1)
+            config = {}
         return config
 
     @staticmethod
