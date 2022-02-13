@@ -31,9 +31,11 @@ def print_console(msg, level=INFO, formatter=0):
 
 def host_platform():
     if os.name == "nt":
-        return "w64"
+        return "windows"
     if os.path.isfile("/default.prop"):
         return "android"
+    if os.uname().sysname == "Darwin":
+        return "osx"
     return "unix"
 
 
