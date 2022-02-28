@@ -74,7 +74,7 @@ jobs:
   release-job:
     name: Publish package
     runs-on: ubuntu-20.04
-    needs: [integration-tests, flake8, pylint]
+    needs: [integration-tests, unit-tests, flake8, pylint]
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - name: Checkout
