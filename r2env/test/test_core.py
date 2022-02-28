@@ -4,7 +4,7 @@ from mock import patch
 import unittest
 
 from r2env.core import R2Env
-from r2env.exceptions import r2EnvException
+from r2env.exceptions import R2EnvException
 
 
 class TestCore(unittest.TestCase):
@@ -67,7 +67,7 @@ class TestCore(unittest.TestCase):
     @patch("os.path.isdir")
     def test_check_if_r2env_not_initialized(self, mock_isdir):
         mock_isdir.return_value = False
-        with self.assertRaises(r2EnvException):
+        with self.assertRaises(R2EnvException):
             R2Env().check_if_r2env_initialized()
 
     @patch("r2env.core.print_console")
@@ -136,7 +136,7 @@ class TestCore(unittest.TestCase):
         mock_initialized.return_value = True
         package = "radare2"
         version = "5.3.0"
-        with self.assertRaises(r2EnvException):
+        with self.assertRaises(R2EnvException):
             R2Env().install(f"{package}{version}", use_dist=True)
 
     @patch("r2env.core.R2Env._check_package_format")
@@ -175,7 +175,7 @@ class TestCore(unittest.TestCase):
         mock_initialized.return_value = True
         mock_valid_format.return_value = False
         package = "radare2@5.3.0"
-        with self.assertRaises(r2EnvException):
+        with self.assertRaises(R2EnvException):
             R2Env().uninstall(package, use_dist=True)
 
     @patch("shutil.rmtree")
@@ -209,7 +209,7 @@ class TestCore(unittest.TestCase):
     def test_use_with_no_none_package(self, mock_initialized, mock_list_pkg):
         mock_initialized.return_value = True
         r2env = R2Env()
-        with self.assertRaises(r2EnvException):
+        with self.assertRaises(R2EnvException):
             r2env.use(None)
         mock_list_pkg.assert_called_once()
 
@@ -218,7 +218,7 @@ class TestCore(unittest.TestCase):
     def test_use_with_no_package(self, mock_initialized, mock_list_pkg):
         mock_initialized.return_value = True
         r2env = R2Env()
-        with self.assertRaises(r2EnvException):
+        with self.assertRaises(R2EnvException):
             r2env.use()
         mock_list_pkg.assert_called_once()
 
