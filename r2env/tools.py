@@ -2,14 +2,14 @@
 
 import json
 import os
-import sys
 
 from shutil import which
 from colorama import Fore, Style
 from git import Repo
 
 
-# Global Vars
+from r2env.exceptions import PackageManagerException
+
 INFO = 0
 WARNING = 1
 ERROR = 2
@@ -40,30 +40,30 @@ def host_platform():
 
 
 # TODO :improve to support all archs
-def host_distname():
+def host_distname():  # noqa: C901
+    dist_name = None
     try:
         sysname = os.uname().sysname
         machine = os.uname().machine
-    except Exception:
-        sysname = "w64"
+    except AttributeError:
+        sysname = "Windows"
         machine = "amd64"
-    if sysname == "Darwin":
-        if machine == "x86_64":
-            return "mac_x64"
-        if machine == "arm64":
-            return "mac_arm64"
-        return None
-    if sysname == "Linux":
-        if not os.path.exists("/usr/bin/dpkg"):
-            return None
-        if machine == "x86_64":
-            return "deb_x64"
-        return "deb_i386"
-    if os.name == "nt":
-        return "w64"
+    if sysname in "Windows" and os.name in "nt":
+        dist_name = "w64"
+    elif sysname in "Darwin":
+        if machine in "x86_64":
+            dist_name = "mac_x64"
+        if machine in "arm64":
+            dist_name = "mac_arm64"
+    elif sysname == "Linux":
+        if os.path.exists("/usr/bin/dpkg"):
+            if machine == "x86_64":
+                dist_name = "deb_x64"
+            else:
+                dist_name = "deb_i386"
     if os.path.isfile("/default.prop"):
-        return "android"
-    return None
+        dist_name = "android"
+    return dist_name
 
 
 def git_fetch(url, version, source_path):
@@ -92,8 +92,7 @@ def exists(tool):
 def exit_if_not_exists(tools):
     for tool in tools:
         if not exists(tool):
-            print_console("[x] {} is required. Please install it first", level=ERROR)
-            sys.exit(-1)
+            raise PackageManagerException("[x] {} is required. Please install it first")
 
 
 def load_json_file(filepath):
