@@ -36,6 +36,17 @@ jobs:
         run: pip install -r requirements/test.txt
       - name: Run
         run: tox -e py38-codecheck-flake8
+  unit-tests:
+    name: linux-unit-tests
+    runs-on: ubuntu-20.04
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: pip install -r requirements/test.txt
+      - name: Run
+        run: tox -e py38-tests
   integration-tests:
     name: linux-integration-tests
     runs-on: ubuntu-20.04
