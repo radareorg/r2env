@@ -4,13 +4,12 @@ import os
 import shutil
 
 import json
-import sys
 from pathlib import Path
 import re
 
 from dploy import stow, unstow
 
-from r2env.exceptions import r2EnvException
+from r2env.exceptions import R2EnvException
 from r2env.package_manager import PackageManager
 from r2env.tools import print_console, load_json_file, WARNING, ERROR, host_platform
 
@@ -69,7 +68,7 @@ class R2Env:
         use_meson = kwargs["use_meson"] if "use_meson" in kwargs else False
         use_dist = kwargs["use_dist"] if "use_dist" in kwargs else False
         if not self._check_package_format(package):
-            raise r2EnvException("[x] Invalid package format.")
+            raise R2EnvException("[x] Invalid package format.")
         try:
             profile, version = package.split('@')
         except ValueError:
@@ -82,7 +81,7 @@ class R2Env:
         self.check_if_r2env_initialized()
         use_dist = kwargs["use_dist"] if "use_dist" in kwargs else False
         if not self._check_package_format(package):
-            raise r2EnvException("[x] Invalid package format.")
+            raise R2EnvException("[x] Invalid package format.")
         self._package_manager.uninstall_package(package, use_dist)
 
     def purge(self):
@@ -93,7 +92,7 @@ class R2Env:
         self.check_if_r2env_initialized()
         if not package:
             self.list_installed_packages()
-            raise r2EnvException("[x] Package not defined.")
+            raise R2EnvException("[x] Package not defined.")
         cur_ver = self._get_current_version()
         new_dst_dir = self._package_manager.get_package_path(package)
         if cur_ver:
@@ -168,4 +167,4 @@ class R2Env:
 
     def check_if_r2env_initialized(self):
         if not os.path.isdir(self._r2env_path):
-            raise r2EnvException("Not r2env initialized. Execute 'r2env init' first.")
+            raise R2EnvException("Not r2env initialized. Execute 'r2env init' first.")

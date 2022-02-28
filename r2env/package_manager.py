@@ -7,11 +7,12 @@ import time
 from zipfile import ZipFile
 
 import wget
+
+from r2env.exceptions import PackageManagerException
 from r2env.tools import load_json_file, git_fetch, git_clean, print_console, ERROR, exit_if_not_exists, host_distname
 
 
 class PackageManager:
-
     LOG_DIR = "log"
     PACKAGES_DIR = "versions"
     SOURCE_DIR = "src"
@@ -40,7 +41,7 @@ class PackageManager:
         filename = os.path.join(os.path.dirname(__file__), 'config', 'profiles.json')
         profiles = load_json_file(filename)
         if not profiles:
-            sys.exit(-1)
+            raise PackageManagerException("No profiles configured.")
         return profiles
 
     def install_package(self, profile, version, use_meson, use_dist):
@@ -60,13 +61,15 @@ class PackageManager:
             if self._install_from_dist(profile, version):
                 print_console(f"[*] Binary package {profile}@{version} installed successfully")
             else:
-                print_console("[x] Unexpected Error.", level=ERROR)
-        elif self._build_from_source(profile, version, source_path, dst_dir, logfile, use_meson=use_meson):
-            print_console(f"[*] Package {profile}@{version} installed successfully")
+                raise PackageManagerException(f"[x] Failed to install {profile}@{version}.")
         else:
-            print_console(f"[x] Something wrong happened during the build process. Check {logfile} for more information.", level=ERROR)
-            if os.path.isdir(dst_dir):
-                shutil.rmtree(dst_dir)
+            if self._build_from_source(profile, version, source_path, dst_dir, logfile, use_meson=use_meson):
+                print_console(f"[*] Package {profile}@{version} installed successfully")
+            else:
+                if os.path.isdir(dst_dir):
+                    shutil.rmtree(dst_dir)
+                raise PackageManagerException(f"[x] Failed to build {profile}@{version}. "
+                                              f"Check {logfile} for more information.")
 
     def uninstall_package(self, package_name, use_dist):
         pkg_found = False
@@ -77,15 +80,15 @@ class PackageManager:
                     profile, version = package.split("@")
                     self._uninstall_from_dist(profile, version)
                 else:
-                    pkg_dir = os.path.join(os.path.join(self._r2env_path, self.PACKAGES_DIR), package_name)
+                    pkg_dir = os.path.join(self._r2env_path, self.PACKAGES_DIR, package)
                     try:
                         shutil.rmtree(pkg_dir)
                         print_console(f"[-] Removed package {package_name}")
                     except OSError as err:
-                        print_console(f"[x] Unable to remove package {package_name}. Error: {err}", ERROR)
+                        raise PackageManagerException(f"[x] Unable to remove package {package_name}. Error: {err}")
                 break
         if not pkg_found:
-            print_console("[x] Unable to find installed package {package_name}", ERROR)
+            raise PackageManagerException(f"[x] Unable to find installed package {package_name}")
 
     def _get_pkgname(self, profile, version, cos):
         for pkgv in self._packages[profile]["versions"]:
@@ -153,8 +156,10 @@ class PackageManager:
         if sysname == "Darwin":
             pkgname = "org.radare.radare2"
             os.system("pkgutil --pkg-info " + pkgname)
-            os.system("cd / && pkgutil --only-files --files " + pkgname + " | tr '\\n' '\\0' | xargs -n 1 -0 sudo rm -f")
-            os.system("cd / && pkgutil --only-dirs --files " + pkgname + " | tail -r | tr '\\n' '\\0' | xargs -n 1 -0 sudo rmdir 2>/dev/null")
+            os.system(
+                "cd / && pkgutil --only-files --files " + pkgname + " | tr '\\n' '\\0' | xargs -n 1 -0 sudo rm -f")
+            os.system(
+                "cd / && pkgutil --only-dirs --files " + pkgname + " | tail -r | tr '\\n' '\\0' | xargs -n 1 -0 sudo rmdir 2>/dev/null")
             os.system("sudo pkgutil --forget " + pkgname)
         if sysname == "Linux" and os.path.exists("/usr/bin/dpkg"):
             try:
@@ -211,5 +216,5 @@ class PackageManager:
                 pkg_found = True
                 break
         if not pkg_found:
-            print_console(f"{profile}@{version} package not available. Use 'list' command to see available packages.", level=ERROR)
-            sys.exit(-1)
+            raise PackageManagerException(
+                f"{profile}@{version} package not available. Use 'list' command to see available packages.")

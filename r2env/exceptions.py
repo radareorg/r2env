@@ -1,5 +1,10 @@
-class ActionException(Exception):
+class R2EnvException(Exception):
     pass
 
-class r2EnvException(ActionException):
+
+class ActionException(R2EnvException):
+    pass
+
+
+class PackageManagerException(R2EnvException):
     pass
