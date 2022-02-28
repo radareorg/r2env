@@ -2,7 +2,6 @@
 
 import os
 import shutil
-import sys
 import time
 from zipfile import ZipFile
 
@@ -16,6 +15,7 @@ class PackageManager:
     LOG_DIR = "log"
     PACKAGES_DIR = "versions"
     SOURCE_DIR = "src"
+    DOWNLOAD_URL = "https://github.com/radareorg/radare2/releases/download/"
 
     def __init__(self, r2env_path):
         self._packages = self._load_profiles()
@@ -85,7 +85,8 @@ class PackageManager:
                         shutil.rmtree(pkg_dir)
                         print_console(f"[-] Removed package {package_name}")
                     except OSError as err:
-                        raise PackageManagerException(f"[x] Unable to remove package {package_name}. Error: {err}")
+                        raise PackageManagerException(f"[x] Unable to remove package {package_name}. Error: {err}") \
+                            from err
                 break
         if not pkg_found:
             raise PackageManagerException(f"[x] Unable to find installed package {package_name}")
@@ -99,10 +100,9 @@ class PackageManager:
         return None
 
     def _get_disturl(self, profile, version, cos):
-        github_url = "https://github.com/radareorg/radare2/releases/download/"
         pkgname = self._get_pkgname(profile, version, cos)
         if pkgname is not None:
-            return "/".join([github_url, version, pkgname])
+            return "/".join([self.DOWNLOAD_URL, version, pkgname])
         return None
 
     def _install_from_dist(self, profile, version):
@@ -110,21 +110,25 @@ class PackageManager:
         dist_name = host_distname()
         disturl = self._get_disturl(profile, version, dist_name)
         pkgname = self._get_pkgname(profile, version, dist_name)
-        ofile = "/".join([self._r2env_path, "src", pkgname])
-        # os.system("wget -O " + ofile + " -qc " + disturl)
-        wget.download(disturl, ofile)
-        try:
-            sysname = os.uname().sysname
-        except Exception:
-            sysname = "Windows"
-        # TODO: checksum
-        if sysname == "Darwin":
-            if os.system("sudo installer -pkg " + ofile + " -target /") == 0:
-                return True
-        if sysname == "Windows":
-            with ZipFile(ofile, 'r') as zip_file:
-                zip_file.extractall()
-                dst = os.path.sep.join([self._r2env_path, "bin"])
+        pkgfile = "/".join([self._r2env_path, "src", pkgname])
+        wget.download(disturl, pkgfile)
+        sysname = host_distname()
+        # TODO: check package checksum
+        if sysname in "Darwin":
+            return os.system(f"sudo installer -pkg {pkgfile} -target /") == 0
+        if sysname in "w64":
+            return self._install_windows_package(pkgfile)
+        if sysname in "deb_x64" or sysname in "deb_i386":
+            return os.system(f"sudo dpkg -i {pkgfile}") == 0
+        if sysname in "android":  # termux
+            return os.system("apt install radare2") == 0
+        raise PackageManagerException(f"Operative System not supported: {os.uname()}")
+
+    def _install_windows_package(self, pkgfile):
+        with ZipFile(pkgfile, 'r') as zip_file:
+            zip_file.extractall()
+            dst = os.path.sep.join([self._r2env_path, "bin"])
+            try:
                 for filename in zip_file.namelist():
                     if filename.endswith(".exe") or filename.endswith(".dll") and filename.find("bin") != -1:
                         fname = os.path.basename(filename)
@@ -137,42 +141,31 @@ class PackageManager:
                 radare2_bin_file_path = os.path.sep.join([self._r2env_path, "bin", "radare2.exe"])
                 r2_bin_file_path = os.path.sep.join([self._r2env_path, "bin", "r2.exe"])
                 shutil.copyfile(radare2_bin_file_path, r2_bin_file_path)
-        if sysname == "Linux" and os.path.exists("/usr/bin/dpkg"):
-            if os.system("sudo dpkg -i " + ofile) == 0:
                 return True
-        if os.path.isfile("/default.prop"):  # termux
-            if os.system("apt install radare2") == 0:
-                return True
-            return False
-        return False
+            except IOError as err:
+                print_console(f"[x] Unable to copy file {err}", level=ERROR)
+                self._uninstall_from_dist("radare2", "latest")
+        raise PackageManagerException(f"An error occurred when installing {pkgfile}.")
 
-    @staticmethod
-    def _uninstall_from_dist(profile, version):
-        print_console(f"[*] Uninstalling {profile}@{version} package from binary dist")
-        try:
-            sysname = os.uname().sysname
-        except Exception:
-            sysname = "Windows"
+    def _uninstall_from_dist(self, profile, version):
+        print_console(f"[*] Cleaning {profile}@{version} package from binary dist")
+        sysname = host_distname()
+        if sysname == "Windows":
+            dst = os.path.sep.join([self._r2env_path, "bin"])
+            shutil.rmtree(dst)
         if sysname == "Darwin":
             pkgname = "org.radare.radare2"
             os.system("pkgutil --pkg-info " + pkgname)
-            os.system(
-                "cd / && pkgutil --only-files --files " + pkgname + " | tr '\\n' '\\0' | xargs -n 1 -0 sudo rm -f")
-            os.system(
-                "cd / && pkgutil --only-dirs --files " + pkgname + " | tail -r | tr '\\n' '\\0' | xargs -n 1 -0 sudo rmdir 2>/dev/null")
-            os.system("sudo pkgutil --forget " + pkgname)
-        if sysname == "Linux" and os.path.exists("/usr/bin/dpkg"):
-            try:
-                pkgname = profile.split("@")[0]
-            except Exception:
-                pkgname = profile
-            if os.system("sudo dpkg -r " + pkgname) == 0:
-                return True
-        if os.path.isfile("/default.prop"):  # termux
-            if os.system("sudo dpkg -r radare2") == 0:
-                return True
-            return False
-        return True
+            os.system(f"cd / && pkgutil --only-files --files {pkgname} | "
+                      f"tr '\\n' '\\0' | xargs -n 1 -0 sudo rm -f")
+            os.system(f"cd / && pkgutil --only-dirs --files {pkgname} | "
+                      f"tail -r | tr '\\n' '\\0' | xargs -n 1 -0 sudo rmdir 2>/dev/null")
+            os.system(f"sudo pkgutil --forget {pkgname}")
+        if sysname in ("deb_x64", "deb_i386"):
+            return os.system("sudo dpkg -r " + profile) == 0
+        if sysname == "android":  # termux
+            return os.system("sudo dpkg -r radare2") == 0
+        raise PackageManagerException(f"Operative System not supported: {os.uname()}")
 
     def _build_from_source(self, profile, version, source_path, dst_path, logfile, use_meson=False):
         exit_if_not_exists(['git'])
@@ -194,10 +187,13 @@ class PackageManager:
         if os.path.isfile("/default.prop"):
             extra_flags = " --with-compiler=termux"
         config_path = r2env_path + "/lib/pkgconfig"
-        cmd = f"(export PKG_CONFIG_PATH=\"{config_path}\";cd {source_path} && rm -rf shlr/capstone && ./configure {extra_flags}" \
-              f" --with-rpath --prefix={dst_path} 2>&1 && make -j4 2>&1" \
-              f"&& make install) > {logfile}"
-        print(cmd)
+        cmd = f"(export PKG_CONFIG_PATH=\"{config_path}\";" \
+              f"cd {source_path} && " \
+              f"rm -rf shlr/capstone && " \
+              f"./configure {extra_flags} --with-rpath --prefix={dst_path} 2>&1 && " \
+              f"make -j4 2>&1 && " \
+              f"make install) > {logfile}"
+        print_console(f"Executing {cmd}")
         return os.system(cmd) == 0
 
     @staticmethod
@@ -205,8 +201,12 @@ class PackageManager:
         exit_if_not_exists(['meson', 'ninja'])
         print_console("[-] Building package using meson ...")
         config_path = r2env_path + "/lib/pkgconfig"
-        cmd = f"(export PKG_CONFIG_PATH=\"{config_path}\";cd {source_path} && rm -rf build && meson . build --buildtype=release --prefix={dst_path} -Dlocal=true 2>&1" \
-              f"&& ninja -C build && ninja -C build install) > {logfile}"
+        cmd = f"(export PKG_CONFIG_PATH=\"{config_path}\";" \
+              f"cd {source_path} && rm -rf build && " \
+              f"meson . build --buildtype=release --prefix={dst_path} -Dlocal=true 2>&1 && " \
+              f"ninja -C build && " \
+              f"ninja -C build install) > {logfile}"
+        print_console(f"Executing {cmd}")
         return os.system(cmd) == 0
 
     def _exit_if_package_not_available(self, profile, version):
