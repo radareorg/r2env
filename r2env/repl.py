@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-from r2env.exceptions import ActionException
+from r2env.exceptions import ActionException, R2EnvException, PackageManagerException
 from r2env.tools import print_console, ERROR
 from r2env.core import R2Env
 
@@ -107,10 +107,16 @@ def main():
     try:
         REPL().run_action(action_args)
     except ActionException as err:
-        print_console(err.msg, level=ERROR)
+        print_console(f"[x] Parameter error. Details: {err.msg}", level=ERROR)
+        sys.exit(-1)
+    except R2EnvException as err:
+        print_console(f"[x] r2Env Error: {err.msg}", level=ERROR)
+        sys.exit(-1)
+    except PackageManagerException as err:
+        print_console(f"[x] Package Error: {err.msg}", level=ERROR)
         sys.exit(-1)
     except Exception as err:
-        print_console(f"A generic error occured. Error: {err.msg}", level=ERROR)
+        print_console(f"Unknown error occurred. Error: {err.msg}", level=ERROR)
         sys.exit(-1)
 
 
