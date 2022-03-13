@@ -3,7 +3,8 @@
 import os
 import shutil
 import time
-from zipfile import ZipFile
+from urllib.error import URLError
+import zipfile
 
 import wget
 
@@ -111,59 +112,67 @@ class PackageManager:
         disturl = self._get_disturl(profile, version, dist_name)
         pkgname = self._get_pkgname(profile, version, dist_name)
         pkgfile = "/".join([self._r2env_path, "src", pkgname])
-        wget.download(disturl, pkgfile)
-        sysname = host_distname()
+        try:
+            wget.download(disturl, pkgfile)
+        except (URLError, ConnectionResetError) as err:
+            raise PackageManagerException(f"Failed to download {profile} package. Error: {err}") from err
         # TODO: check package checksum
-        if sysname in "Darwin":
+        if dist_name in ("mac_x64", "mac_arm64"):
             return os.system(f"sudo installer -pkg {pkgfile} -target /") == 0
-        if sysname in "w64":
+        if dist_name in "w64":
             return self._install_windows_package(pkgfile)
-        if sysname in "deb_x64" or sysname in "deb_i386":
+        if dist_name in ("deb_x64", "deb_i386"):
             return os.system(f"sudo dpkg -i {pkgfile}") == 0
-        if sysname in "android":  # termux
+        if dist_name in "android":  # termux
             return os.system("apt install radare2") == 0
         raise PackageManagerException(f"Operative System not supported: {os.uname()}")
 
     def _install_windows_package(self, pkgfile):
-        with ZipFile(pkgfile, 'r') as zip_file:
-            zip_file.extractall()
-            dst = os.path.sep.join([self._r2env_path, "bin"])
-            try:
-                for filename in zip_file.namelist():
-                    if filename.endswith(".exe") or filename.endswith(".dll") and filename.find("bin") != -1:
-                        fname = os.path.basename(filename)
-                        d = os.path.sep.join([dst, fname])
-                        dname = os.path.dirname(d)
-                        if not os.path.isdir(dname):
-                            os.makedirs(dname, 493)  # 0755)
-                        shutil.copyfile(filename, d)
-                        print_console(filename)
+        try:
+            with zipfile.ZipFile(pkgfile, 'r') as zip_file:
+                zip_file.extractall()
+                dst_folder = os.path.sep.join([self._r2env_path, "bin"])
+                if not os.path.isdir(dst_folder):
+                    os.makedirs(dst_folder, 493)  # 0755)
+                for file_path in zip_file.namelist():
+                    if file_path.endswith(".exe") or file_path.endswith(".dll") and file_path.find("bin") != -1:
+                        file_name = os.path.basename(file_path)
+                        dst_filepath = os.path.sep.join([dst_folder, file_name])
+                        shutil.copyfile(file_path, dst_filepath)
+                        print_console(f"[-] Copying {file_path}")
                 radare2_bin_file_path = os.path.sep.join([self._r2env_path, "bin", "radare2.exe"])
                 r2_bin_file_path = os.path.sep.join([self._r2env_path, "bin", "r2.exe"])
                 shutil.copyfile(radare2_bin_file_path, r2_bin_file_path)
                 return True
-            except IOError as err:
-                print_console(f"[x] Unable to copy file {err}", level=ERROR)
-                self._uninstall_from_dist("radare2", "latest")
-        raise PackageManagerException(f"An error occurred when installing {pkgfile}.")
+        except (FileNotFoundError, IOError) as err:
+            print_console(f"[x] An error occurred when installing {pkgfile}. Error: {err}", level=ERROR)
+            self._uninstall_from_dist("radare2", "latest")
+            raise PackageManagerException(f"Unable to install Windows package {pkgfile}.") from err
 
     def _uninstall_from_dist(self, profile, version):
         print_console(f"[*] Cleaning {profile}@{version} package from binary dist")
-        sysname = host_distname()
-        if sysname == "Windows":
+        dist_name = host_distname()
+        if dist_name in "w64":
             dst = os.path.sep.join([self._r2env_path, "bin"])
-            shutil.rmtree(dst)
-        if sysname == "Darwin":
+            print_console(f"[*] Removing {dst}")
+            try:
+                shutil.rmtree(dst)
+                return True
+            except OSError as err:
+                raise PackageManagerException(f"An issue occurred while removing {dst}. Error: {err}")
+        if dist_name in ("mac_x64", "mac_arm64"):
+            result_code = 0
             pkgname = "org.radare.radare2"
-            os.system("pkgutil --pkg-info " + pkgname)
-            os.system(f"cd / && pkgutil --only-files --files {pkgname} | "
-                      f"tr '\\n' '\\0' | xargs -n 1 -0 sudo rm -f")
-            os.system(f"cd / && pkgutil --only-dirs --files {pkgname} | "
-                      f"tail -r | tr '\\n' '\\0' | xargs -n 1 -0 sudo rmdir 2>/dev/null")
-            os.system(f"sudo pkgutil --forget {pkgname}")
-        if sysname in ("deb_x64", "deb_i386"):
+            result_code += os.system("pkgutil --pkg-info " + pkgname)
+            result_code += os.system(f"cd / && pkgutil --only-files --files {pkgname} | "
+                                     f"tr '\\n' '\\0' | xargs -n 1 -0 sudo rm -f")
+            result_code += os.system(f"cd / && pkgutil --only-dirs --files {pkgname} | "
+                                     f"tail -r | tr '\\n' '\\0' | xargs -n 1 -0 sudo rmdir 2>/dev/null")
+            result_code += os.system(f"sudo pkgutil --forget {pkgname}")
+            return result_code == 0
+        if dist_name in ("deb_x64", "deb_i386"):
             return os.system("sudo dpkg -r " + profile) == 0
-        if sysname == "android":  # termux
+        if dist_name in "android":  # termux
             return os.system("sudo dpkg -r radare2") == 0
         raise PackageManagerException(f"Operative System not supported: {os.uname()}")
 
