@@ -39,7 +39,7 @@ class REPL:
     """
 
     def __init__(self):
-        self.actions_with_arguments = ["add", "install", "rm", "uninstall", "use", "sh", "shell"]
+        self.actions_with_arguments = ["add", "install", "rm", "uninstall", "use"]
         self._core = R2Env()
         self.actions = {
             "init": self._core.init,
