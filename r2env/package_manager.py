@@ -159,7 +159,7 @@ class PackageManager:
                 shutil.rmtree(dst)
                 return True
             except OSError as err:
-                raise PackageManagerException(f"An issue occurred while removing {dst}. Error: {err}")
+                raise PackageManagerException(f"An issue occurred while removing {dst}. Error: {err}") from err
         if dist_name in ("mac_x64", "mac_arm64"):
             result_code = 0
             pkgname = "org.radare.radare2"
