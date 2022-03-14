@@ -88,7 +88,7 @@ class R2Env:
         print_console(f"[*] Removing {self._r2env_path}")
         shutil.rmtree(self._r2env_path)
 
-    def use(self, package=None, **kwargs):
+    def use(self, package=None, **_kwargs):
         self.check_if_r2env_initialized()
         if not package:
             self.list_installed_packages()
@@ -107,7 +107,7 @@ class R2Env:
         with open(thispath + "/version.txt", "r", encoding="utf-8") as version:
             return version.read()
 
-    def shell(self, cmd="", **kwargs):
+    def shell(self, cmd="", **_kwargs):
         bin_path = os.path.join(self._r2env_path, "bin")
         if host_platform() == "windows":
             os.system(f"set PATH={bin_path};%PATH% && cmd")
