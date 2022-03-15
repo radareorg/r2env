@@ -4,6 +4,8 @@ import json
 import os
 
 from shutil import which
+
+import git
 from colorama import Fore, Style
 from git import Repo
 
@@ -67,11 +69,17 @@ def host_distname():  # noqa: C901
 
 
 def git_fetch(url, version, source_path):
-    if os.path.isdir(os.path.join(source_path, ".git")):
-        repo = Repo(source_path)
-        repo.remotes.origin.pull("master")
-    else:
-        repo = Repo.clone_from(url, source_path)
+    try:
+        if os.path.isdir(os.path.join(source_path, ".git")):
+            repo = Repo(source_path)
+            repo.remotes.origin.pull("master")
+            repo.heads.master.checkout
+        else:
+            repo = Repo.clone_from(url, source_path)
+    except git.GitCommandError as err:
+        raise PackageManagerException("An error occured clonning the repo. "
+                                      f"Verify the source path is not dirty. Error: {err}") \
+            from err
     if version != "git":
         repo.git.checkout(version)
     sms = repo.submodules
