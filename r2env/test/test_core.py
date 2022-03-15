@@ -184,6 +184,18 @@ class TestCore(unittest.TestCase):
         r2env.purge()
         mock_rmtree.assert_called_with(r2env._r2env_path)
 
+
+    @patch("r2env.core.PackageManager.list_installed_packages")
+    @patch("r2env.core.R2Env.check_if_r2env_initialized")
+    def test_use_package_not_installed(self, mock_initialized, mock_list_pkg):
+        package = "radare2@not_existing"
+        mock_list_pkg.return_value = ["radare2@1.0.0"]
+        mock_initialized.return_value = True
+        r2env = R2Env()
+        with self.assertRaises(R2EnvException):
+            r2env.use(package)
+
+    @patch("r2env.core.PackageManager.list_installed_packages")
     @patch("r2env.core.PackageManager.get_package_path")
     @patch("r2env.core.unstow")
     @patch("r2env.core.stow")
@@ -191,13 +203,14 @@ class TestCore(unittest.TestCase):
     @patch("r2env.core.R2Env._get_current_version")
     @patch("r2env.core.R2Env.check_if_r2env_initialized")
     def test_use_successfully(self, mock_initialized, mock_get_cur_ver, mock_set_cur_ver, mock_stow, mock_unstow,
-                              mock_pkg_path):
-        package = "radare2@git"
+                              mock_pkg_path, mock_list_pkg):
+        package = "radare2@5.3.0"
         mock_initialized.return_value = True
         mock_get_cur_ver.return_value = "5.3.0"
+        mock_list_pkg.return_value = ["radare2@5.3.0"]
         new_path = f"new_path/{package}"
         curr_path = f"new_path/old_package"
-        mock_pkg_path.side_effect = [new_path,curr_path]
+        mock_pkg_path.side_effect = [new_path, curr_path]
         r2env = R2Env()
         r2env.use(package)
         mock_set_cur_ver.assert_called_once_with(package)
