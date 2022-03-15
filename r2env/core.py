@@ -92,7 +92,9 @@ class R2Env:
         self.check_if_r2env_initialized()
         if not package:
             self.list_installed_packages()
-            raise R2EnvException("[x] Package not defined.")
+            raise R2EnvException("Package not defined.")
+        if package not in self._package_manager.list_installed_packages():
+            raise R2EnvException(f"Package {package} not installed.")
         cur_ver = self._get_current_version()
         new_dst_dir = self._package_manager.get_package_path(package)
         if cur_ver:

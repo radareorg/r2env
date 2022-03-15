@@ -72,8 +72,8 @@ def git_fetch(url, version, source_path):
     try:
         if os.path.isdir(os.path.join(source_path, ".git")):
             repo = Repo(source_path)
+            repo.git.checkout("master")
             repo.remotes.origin.pull("master")
-            repo.heads.master.checkout
         else:
             repo = Repo.clone_from(url, source_path)
     except git.GitCommandError as err:
