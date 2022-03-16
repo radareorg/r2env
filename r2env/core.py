@@ -109,7 +109,7 @@ class R2Env:
         with open(thispath + "/version.txt", "r", encoding="utf-8") as version:
             return version.read()
 
-    def shell(self, cmd="", **_kwargs):
+    def shell(self, cmd=None, **_kwargs):
         bin_path = os.path.join(self._r2env_path, "bin")
         if host_platform() == "windows":
             os.system(f"set PATH={bin_path};%PATH% && cmd")
@@ -128,9 +128,9 @@ class R2Env:
             library_path = os.path.join(self._r2env_path, "lib")
             # XXX this doesnt work on sip-enabled macs, that's why we use install_name_tool after install
             full_cmd = f"export DYLD_LIBRARY_PATH=\"{library_path}\";" + full_cmd
-        if cmd.strip() == "":
-            return os.system(full_cmd)
-        return os.system(full_cmd + " -c '" + cmd + "'")
+        if cmd is None:
+            return os.system(full_cmd) == 0
+        return os.system(f"{full_cmd} -c '{cmd}' ") == 0
 
     @staticmethod
     def _load_config():
