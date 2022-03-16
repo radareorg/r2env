@@ -116,7 +116,7 @@ class R2Env:
             return True
         pkgconfig_path = os.path.join(self._r2env_path, "lib", "pkgconfig")
         bin_path = os.path.join(self._r2env_path, "bin")
-        export_ps1 = "export PS1=\"r2env\\$ \";"
+        export_ps1 = f"export PS1=\"r2env ({self._get_current_version()})\\$ \";"
         export_pkg_config = f"export PKG_CONFIG_PATH=\"{pkgconfig_path}\";"
         export_path = f"export PATH=\"{bin_path}:$PATH\";"
         cmd_shell = "$SHELL -f"
