@@ -100,7 +100,7 @@ def exists(tool):
 def exit_if_not_exists(tools):
     for tool in tools:
         if not exists(tool):
-            raise PackageManagerException("[x] {} is required. Please install it first")
+            raise PackageManagerException(f"[x] {tool} is required. Please install it first")
 
 
 def load_json_file(filepath):
