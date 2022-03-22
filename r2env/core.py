@@ -126,6 +126,7 @@ class R2Env:
             full_cmd = f"export LD_LIBRARY_PATH=\"{library_path}\";" + full_cmd
         if host_platform() == "osx":
             library_path = os.path.join(self._r2env_path, "lib")
+            # XXX this doesnt work on sip-enabled macs, that's why we use install_name_tool after install
             full_cmd = f"export DYLD_LIBRARY_PATH=\"{library_path}\";" + full_cmd
         if cmd.strip() == "":
             return os.system(full_cmd)

@@ -215,7 +215,8 @@ class PackageManager:
               f"cd \"{source_path}\" && rm -rf build && " \
               f"meson build --buildtype=release --prefix={dst_path} -Dlocal=true 2>&1 && " \
               f"ninja -C build && " \
-              f"ninja -C build install) > {logfile}"
+              f"ninja -C build install) > {logfile} && " \
+              f"for a in {dst_path}/bin/* ; do install_name_tool -add_rpath {dst_path}/lib $a ; done"
         print_console(f"Executing {cmd}")
         return os.system(cmd) == 0
 
