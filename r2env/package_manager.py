@@ -210,9 +210,10 @@ class PackageManager:
         exit_if_not_exists(['meson', 'ninja'])
         print_console("[-] Building package using meson ...")
         config_path = r2env_path + "/lib/pkgconfig"
+	# TODO: ensure source_path logfile or dst_path have no spaces
         cmd = f"(export PKG_CONFIG_PATH=\"{config_path}\";" \
-              f"cd {source_path} && rm -rf build && " \
-              f"meson . build --buildtype=release --prefix={dst_path} -Dlocal=true 2>&1 && " \
+              f"cd \"{source_path}\" && rm -rf build && " \
+              f"meson build --buildtype=release --prefix={dst_path} -Dlocal=true 2>&1 && " \
               f"ninja -C build && " \
               f"ninja -C build install) > {logfile}"
         print_console(f"Executing {cmd}")
