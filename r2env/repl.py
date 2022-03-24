@@ -67,7 +67,7 @@ class REPL:
 
     def run_action(self, action_args):
         args = []
-        if not action_args or len(action_args.args) == 0:
+        if not action_args:
             self.show_help()
             raise ActionException("No action selected")
         if action_args.version:
@@ -76,6 +76,9 @@ class REPL:
         if action_args.list:
             list_method = self.actions["list"]
             list_method()
+        if len(action_args.args) == 0:
+            self.show_help()
+            raise ActionException("No action selected")
         if len(action_args.args) > 1:
             args = action_args.args[1:]
         action = action_args.args[0]

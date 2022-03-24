@@ -106,8 +106,8 @@ class R2Env:
     @staticmethod
     def version():
         thispath = os.path.dirname(os.path.realpath(__file__))
-        with open(thispath + "/version.txt", "r", encoding="utf-8") as version:
-            return version.read()
+        with open(f"{thispath}/version.txt", "r", encoding="utf-8") as version:
+            print_console(version.read()})
 
     def shell(self, cmd=None, **_kwargs):
         bin_path = os.path.join(self._r2env_path, "bin")
@@ -129,7 +129,7 @@ class R2Env:
             full_cmd = f"export DYLD_LIBRARY_PATH=\"{library_path}\";" + full_cmd
         if cmd is None:
             return os.system(full_cmd) == 0
-        return os.system(f"{full_cmd} -c '{cmd}' ") == 0
+        return os.system(f"{full_cmd} -c '{cmd}'") == 0
 
     @staticmethod
     def _load_config():
