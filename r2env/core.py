@@ -107,7 +107,7 @@ class R2Env:
     def version():
         thispath = os.path.dirname(os.path.realpath(__file__))
         with open(f"{thispath}/version.txt", "r", encoding="utf-8") as version:
-            print_console(version.read()})
+            print_console(version.read())
 
     def shell(self, cmd=None, **_kwargs):
         bin_path = os.path.join(self._r2env_path, "bin")
