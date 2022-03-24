@@ -262,7 +262,7 @@ class TestCore(unittest.TestCase):
         cmd = "r2 -v"
         R2Env().shell(cmd)
         mock_system.assert_called_with(f"export LD_LIBRARY_PATH=\"{r2env_path}/lib\";"
-                                       f"export PS1=\"r2env\\$ \";"
+                                       f"export PS1=\"r2env ()\\$ \";"
                                        f"export PKG_CONFIG_PATH=\"{r2env_path}/lib/pkgconfig\";"
                                        f"export PATH=\"{r2env_path}/bin:$PATH\";"
                                        f"$SHELL -f -c \'{cmd}\'")
@@ -277,7 +277,7 @@ class TestCore(unittest.TestCase):
         cmd = "r2 -v"
         R2Env().shell(cmd)
         mock_system.assert_called_with(f"export DYLD_LIBRARY_PATH=\"{r2env_path}/lib\";"
-                                       f"export PS1=\"r2env\\$ \";"
+                                       f"export PS1=\"r2env ()\\$ \";"
                                        f"export PKG_CONFIG_PATH=\"{r2env_path}/lib/pkgconfig\";"
                                        f"export PATH=\"{r2env_path}/bin:$PATH\";"
                                        f"$SHELL -f -c \'{cmd}\'")
@@ -291,7 +291,7 @@ class TestCore(unittest.TestCase):
         mock_load_json_file.return_value = {"r2env_path": r2env_path}
         cmd = "r2 -v"
         R2Env().shell(cmd)
-        mock_system.assert_called_with(f"export PS1=\"r2env\\$ \";"
+        mock_system.assert_called_with(f"export PS1=\"r2env ()\\$ \";"
                                        f"export PKG_CONFIG_PATH=\"{r2env_path}/lib/pkgconfig\";"
                                        f"export PATH=\"{r2env_path}/bin:$PATH\";"
                                        f"$SHELL -f -c \'{cmd}\'")
