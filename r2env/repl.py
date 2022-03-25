@@ -92,6 +92,8 @@ class REPL:
             raise ActionException(f"Action {action} requires a package as an argument.")
         if action in self.actions_with_arguments:
             self.actions[action](args[0], use_meson=action_args.meson, use_dist=action_args.package)
+        elif action in "shell" and len(args) > 0:
+            self.actions[action](args[0])
         else:
             self.actions[action]()
 
