@@ -134,8 +134,8 @@ class TestCore(unittest.TestCase):
     @patch("r2env.core.R2Env.check_if_r2env_initialized")
     def test_install_successfully_failed(self, mock_initialized):
         mock_initialized.return_value = True
-        package = "radare2"
-        version = "5.3.0"
+        package = "radare2@"
+        version = ""
         with self.assertRaises(R2EnvException):
             R2Env().install(f"{package}{version}", use_dist=True)
 

@@ -228,7 +228,7 @@ class TestPackageManager(unittest.TestCase):
     @patch("r2env.package_manager.wget")
     @patch("r2env.package_manager.PackageManager._get_pkgname")
     @patch("r2env.package_manager.PackageManager._get_disturl")
-    @patch("r2env.package_manager.hohost_distnamest_distname")
+    @patch("r2env.package_manager.host_distname")
     def test_install_from_dist_wget_is_called(self, mock_host_distname,
                                               mock__get_disturl,
                                               mock__get_pkgname,
