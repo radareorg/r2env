@@ -228,7 +228,7 @@ class TestPackageManager(unittest.TestCase):
     @patch("r2env.package_manager.wget")
     @patch("r2env.package_manager.PackageManager._get_pkgname")
     @patch("r2env.package_manager.PackageManager._get_disturl")
-    @patch("r2env.package_manager.host_distname")
+    @patch("r2env.package_manager.hohost_distnamest_distname")
     def test_install_from_dist_wget_is_called(self, mock_host_distname,
                                               mock__get_disturl,
                                               mock__get_pkgname,
@@ -395,3 +395,9 @@ class TestPackageManager(unittest.TestCase):
         mock_distname.return_value = "non_existent"
         with self.assertRaises(PackageManagerException):
             self.package_manager._uninstall_from_dist("radare2", "1.0.0")
+
+    @patch("r2env.package_manager.host_distname")
+    def test_acr_not_supported_on_windows(self, mock_distname):
+        mock_distname.return_value = "w64"
+        with self.assertRaises(PackageManagerException):
+            self.package_manager._build_using_acr("source", "dest", "logfile", "r2env")
