@@ -191,7 +191,7 @@ class PackageManager:
     def _build_using_acr(source_path, dst_path, logfile, r2env_path):
         """Only works in Unix systems"""
         if host_distname() in "w64":
-            raise PackageManagerException(f"acr is not supported on Windows platform. Use meson instead.")
+            raise PackageManagerException("acr is not supported on Windows platform. Use meson instead.")
         exit_if_not_exists(['make'])
         print_console("[-] Building package using acr...")
         extra_flags = ""
