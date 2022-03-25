@@ -65,7 +65,7 @@ class REPL:
     def show_help(self):
         print_console(self.HELP_MESSAGE)
 
-    def run_action(self, action_args):
+    def run_action(self, action_args):  # noqa: C901
         args = []
         if not action_args:
             self.show_help()
