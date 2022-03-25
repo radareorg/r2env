@@ -67,6 +67,8 @@ class R2Env:
         self.check_if_r2env_initialized()
         use_meson = kwargs["use_meson"] if "use_meson" in kwargs else False
         use_dist = kwargs["use_dist"] if "use_dist" in kwargs else False
+        if "@" not in package:
+            package = f"{package}@git"
         if not self._check_package_format(package):
             raise R2EnvException("[x] Invalid package format.")
         try:
