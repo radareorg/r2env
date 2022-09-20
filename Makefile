@@ -1,7 +1,8 @@
 PYTHON?=python3
+PIP?=pip3
 
 all:
-	pip install .
+	$(PIP) install .
 
 pub:
 	rm -rf dist
@@ -9,9 +10,9 @@ pub:
 	twine upload --repository=pypi --verbose dist/*
 
 install:
-	pip install .
+	$(PIP) install .
 
 uninstall:
-	pip uninstall r2env
+	$(PIP) uninstall r2env
 
 .PHONY: all clean pub install uninstall
