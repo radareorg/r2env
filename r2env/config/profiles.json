@@ -194,6 +194,28 @@
         }
       },
       {
+        "id": "5.7.6",
+        "packages": {
+          "w32": "radare2-5.7.6-w32.zip",
+          "w64": "radare2-5.7.6-w64.zip",
+          "mac_x64": "radare2-5.7.6-amd64.pkg",
+          "mac_arm64": "radare2-5.7.6-m1.pkg",
+          "deb_i386": "radare2_5.7.6_i386.deb",
+          "deb_x64": "radare2_5.7.6_amd64.deb"
+        }
+      },
+      {
+        "id": "5.7.8",
+        "packages": {
+          "w32": "radare2-5.7.8-w32.zip",
+          "w64": "radare2-5.7.8-w64.zip",
+          "mac_x64": "radare2-5.7.8-amd64.pkg",
+          "mac_arm64": "radare2-5.7.8-m1.pkg",
+          "deb_i386": "radare2_5.7.8_i386.deb",
+          "deb_x64": "radare2_5.7.8_amd64.deb"
+        }
+      },
+      {
         "id": "git",
         "packages": {}
       }
