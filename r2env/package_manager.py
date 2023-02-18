@@ -128,7 +128,7 @@ class PackageManager:
             },
             'radare2': {
                 'source': 'https://github.com/radareorg/radare2',
-                'versions': radare2_versions
+                'versions': radare2_versions[::-1]
             }
         }
         if not os.path.isdir(r2env_path):
