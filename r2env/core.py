@@ -170,6 +170,9 @@ class R2Env:
         with open(version_file, 'w', encoding="utf-8") as file_desc:
             file_desc.write(package)
 
+    def update_version_profiles(self):
+        PackageManager.update_radare2_profiles(self._r2env_path)
+
     def check_if_r2env_initialized(self):
         if not os.path.isdir(self._r2env_path):
             raise R2EnvException("Not r2env initialized. Execute 'r2env init' first.")
