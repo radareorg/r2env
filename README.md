@@ -64,6 +64,7 @@ versions       - list installed packages
 list           - list all packages available to r2env
 shell          - enter a new shell with PATH env var set
 purge          - remove ~/.r2env
+update         - update list of available profiles
 
 Environment
 
