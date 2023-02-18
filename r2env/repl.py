@@ -31,6 +31,7 @@ class REPL:
       list          - list all packages available to r2env.
       shell         - enter a new shell with PATH env var set.
       purge         - remove ~/.r2env
+      update        - update list of available profiles
 
     Environment
 
@@ -55,6 +56,7 @@ class REPL:
             "install": self._core.install,
             "installed": self._core.list_installed_packages,
             "uninstall": self._core.uninstall,
+            "update": self._core.update_version_profiles,
             "rm": self._core.uninstall,
             "use": self._core.use,
             "purge": self._core.purge,

@@ -5,8 +5,10 @@ import shutil
 import time
 from urllib.error import URLError
 import zipfile
+import json
 
 import wget
+import requests
 
 from r2env.exceptions import PackageManagerException
 from r2env.tools import load_json_file, git_fetch, git_clean, print_console, ERROR, exit_if_not_exists, host_distname
@@ -19,7 +21,7 @@ class PackageManager:
     DOWNLOAD_URL = "https://github.com/radareorg/radare2/releases/download/"
 
     def __init__(self, r2env_path):
-        self._packages = self._load_profiles()
+        self._packages = self._load_profiles(r2env_path)
         self._r2env_path = r2env_path
 
     def get_package_path(self, package_name):
@@ -38,12 +40,101 @@ class PackageManager:
         return res
 
     @staticmethod
-    def _load_profiles():
-        filename = os.path.join(os.path.dirname(__file__), 'config', 'profiles.json')
+    def _load_profiles(r2env_path):
+        filename = os.path.join(r2env_path, 'profiles.json')
+        # if profiles.json doesn't exist, generate it now
+        if not os.path.exists(filename):
+            print_console(f"NOTE: {filename} does not exist. Generating it now.")
+            PackageManager.update_radare2_profiles(r2env_path)
         profiles = load_json_file(filename)
         if not profiles:
             raise PackageManagerException("No profiles configured.")
         return profiles
+
+    @staticmethod
+    def update_radare2_profiles(r2env_path):
+        filename = os.path.join(r2env_path, 'profiles.json')
+        api_request_url = "https://api.github.com/repos/radareorg/radare2/releases"
+        api_request_headers = ["X-GitHub-Api-Version: 2022-11-28", "Accept: application/vnd.github+json"]
+        gh_release_info_req = requests.get(api_request_url, {"headers": api_request_headers})
+        gh_release_info_req.raise_for_status()  # raise an error if the request got a bad return code
+        gh_release_info = gh_release_info_req.json()
+        git_version = {'id': 'git', 'packages': {}}
+        radare2_versions = [git_version]  # include the git version by default
+        for release in gh_release_info:
+            release_id = release['tag_name']
+            version = {'id': release_id, 'packages': {}}
+            # generate a list of downloadable assets for this release that r2env can use
+            for asset in release['assets']:
+                # note: you're about to see 100 lines of hackery to deal with inconsistent naming schemes
+                # the goal is to include as many valid assets as is reasonable without including any that are not valid
+                # separate file extension
+                asset_name, asset_ext = os.path.splitext(asset['name'])
+
+                # normalize 'seperators' before splitting into components
+                asset_ref = asset_name.replace('_', '-').split('-')
+
+                # filter out things like r2ios_sdk and r2blob
+                if asset_ref[0] != 'radare2':
+                    continue
+
+                # Some assets don't have the version number in the name, which breaks the following processing.
+                # None of them are of interest anyway, so just skip them.
+                if release_id not in asset_ref:
+                    continue
+
+                # remove the beginning 'radare2'
+                asset_ref.remove('radare2')
+
+                # we don't need to care about the release id when checking, so remove it
+                asset_ref.remove(release_id)
+
+                if asset_ext == '.zip':  # used for Windows builds among other things
+                    # if all that remains is w32 or w64, it should be a valid asset for windows
+                    if asset_ref == ['w32']:
+                        version['packages']['w32'] = asset['name']
+                    elif asset_ref == ['w64']:
+                        version['packages']['w64'] = asset['name']
+                elif asset_ext == '.deb':  # deb package
+                    if asset_ref == ['i386']:
+                        version['packages']['deb_i386'] = asset['name']
+                    elif asset_ref == ['amd64']:
+                        version['packages']['deb_x64'] = asset['name']
+                elif asset_ext == '.pkg':  # macos bundle
+                    # if architecture is unspecified, it's reasonable to assume it's x64
+                    if not asset_ref or asset_ref in (['amd64'], ['x64'], ['macos']):
+                        version['packages']['mac_x64'] = asset['name']
+                    elif asset_ref == ['m1']:
+                        version['packages']['mac_arm64'] = asset['name']
+
+            radare2_versions.append(version)
+
+        profiles = {
+            'r2frida': {
+                'source': 'https://github.com/nowsecure/r2frida',
+                'versions': [git_version]
+            },
+            'r2dec': {
+                'source': 'https://github.com/wargio/r2dec-js',
+                'versions': [git_version]
+            },
+            'r2ghidra': {
+                'source': 'https://github.com/radareorg/r2ghidra',
+                'versions': [git_version]
+            },
+            'r0': {
+                'source': 'https://github.com/radareorg/r0',
+                'versions': [git_version]
+            },
+            'radare2': {
+                'source': 'https://github.com/radareorg/radare2',
+                'versions': radare2_versions
+            }
+        }
+        if not os.path.isdir(r2env_path):
+            os.makedirs(r2env_path)
+        with open(filename, 'w') as f:
+            json.dump(profiles, f)
 
     def install_package(self, profile, version, use_meson, use_dist):
         log_path = os.path.join(self._r2env_path, self.LOG_DIR)
