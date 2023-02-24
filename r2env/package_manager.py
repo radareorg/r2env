@@ -54,9 +54,11 @@ class PackageManager:
     @staticmethod
     def update_radare2_profiles(r2env_path):
         filename = os.path.join(r2env_path, 'profiles.json')
-        api_request_url = "https://api.github.com/repos/radareorg/radare2/releases"
-        api_request_headers = ["X-GitHub-Api-Version: 2022-11-28", "Accept: application/vnd.github+json"]
-        gh_release_info_req = requests.get(api_request_url, {"headers": api_request_headers})
+        gh_release_info_req = requests.get(
+            "https://api.github.com/repos/radareorg/radare2/releases",
+            {"headers": ["X-GitHub-Api-Version: 2022-11-28", "Accept: application/vnd.github+json"]},
+            timeout=10 #10-second timeout for API request
+        )
         gh_release_info_req.raise_for_status()  # raise an error if the request got a bad return code
         gh_release_info = gh_release_info_req.json()
         git_version = {'id': 'git', 'packages': {}}
@@ -133,7 +135,7 @@ class PackageManager:
         }
         if not os.path.isdir(r2env_path):
             os.makedirs(r2env_path)
-        with open(filename, 'w') as f:
+        with open(filename, 'w', encoding='utf-8') as f:
             json.dump(profiles, f)
 
     def install_package(self, profile, version, use_meson, use_dist):
