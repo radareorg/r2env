@@ -152,11 +152,17 @@ class PackageManager:
             os.makedirs(source_path)
         if not os.path.isdir(dst_dir):
             os.makedirs(dst_dir)
-        self._exit_if_package_not_available(profile, version)
+        if self._if_package_not_available(profile, version):
+            if os.path.isdir(dst_dir):
+                shutil.rmtree(dst_dir)
+            raise PackageManagerException(
+                f"{profile}@{version} package not available. Use 'list' command to see available packages.")
         if use_dist:
             if self._install_from_dist(profile, version):
                 print_console(f"[*] Binary package {profile}@{version} installed successfully")
             else:
+                if os.path.isdir(dst_dir):
+                    shutil.rmtree(dst_dir)
                 raise PackageManagerException(f"[x] Failed to install {profile}@{version}.")
         else:
             if self._build_from_source(profile, version, source_path, dst_dir, logfile, use_meson=use_meson):
@@ -318,13 +324,9 @@ class PackageManager:
         print_console(f"Executing {cmd}")
         return os.system(cmd) == 0
 
-    def _exit_if_package_not_available(self, profile, version):
-        pkg_found = False
+    def _if_package_not_available(self, profile, version):
         if profile in self._packages:
             for available_version in self._packages[profile]["versions"]:
                 if available_version['id'] == version:
-                    pkg_found = True
-                    break
-        if not pkg_found:
-            raise PackageManagerException(
-                f"{profile}@{version} package not available. Use 'list' command to see available packages.")
+                    return False
+        return True
