@@ -319,10 +319,11 @@ class PackageManager:
 
     def _exit_if_package_not_available(self, profile, version):
         pkg_found = False
-        for available_version in self._packages[profile]["versions"]:
-            if available_version['id'] == version:
-                pkg_found = True
-                break
+        if profile in self._packages[profile]:
+            for available_version in self._packages[profile]["versions"]:
+                if available_version['id'] == version:
+                    pkg_found = True
+                    break
         if not pkg_found:
             raise PackageManagerException(
                 f"{profile}@{version} package not available. Use 'list' command to see available packages.")
