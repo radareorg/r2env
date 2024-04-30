@@ -7,7 +7,9 @@ all:
 pub:
 	rm -rf dist
 	$(PYTHON) setup.py sdist
-	twine upload --repository=pypi --verbose dist/*
+	twine check dist/*
+	twine upload -u __token__ --repository-url https://upload.pypi.org/legacy/ --verbose dist/*
+	#twine upload --repository=pypi --verbose dist/*
 
 install:
 	$(PIP) install .
