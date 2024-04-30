@@ -188,11 +188,12 @@ class PackageManager:
             raise PackageManagerException(f"[x] Unable to find installed package {package_name}")
 
     def _get_pkgname(self, profile, version, cos):
-        for pkgv in self._packages[profile]["versions"]:
-            if pkgv["id"] == version:
-                for pkgd in pkgv["packages"].keys():
-                    if pkgd == cos:
-                        return pkgv["packages"][pkgd]
+        if profile in self._packages:
+            for pkgv in self._packages[profile]["versions"]:
+                if pkgv["id"] == version:
+                    for pkgd in pkgv["packages"].keys():
+                        if pkgd == cos:
+                            return pkgv["packages"][pkgd]
         return None
 
     def _get_disturl(self, profile, version, cos):
@@ -319,7 +320,7 @@ class PackageManager:
 
     def _exit_if_package_not_available(self, profile, version):
         pkg_found = False
-        if profile in self._packages[profile]:
+        if profile in self._packages:
             for available_version in self._packages[profile]["versions"]:
                 if available_version['id'] == version:
                     pkg_found = True
