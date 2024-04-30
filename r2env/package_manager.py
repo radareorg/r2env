@@ -122,6 +122,10 @@ class PackageManager:
                 'source': 'https://github.com/wargio/r2dec-js',
                 'versions': [{'id': 'git', 'packages': {}}]
             },
+            'r2yara': {
+                'source': 'https://github.com/radareorg/r2yara',
+                'versions': [{'id': 'git', 'packages': {}}]
+            },
             'r2ghidra': {
                 'source': 'https://github.com/radareorg/r2ghidra',
                 'versions': [{'id': 'git', 'packages': {}}]
