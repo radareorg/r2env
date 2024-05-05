@@ -81,7 +81,12 @@ def git_fetch(url, version, source_path):
                                       f"Verify the source path is not dirty. Error: {err}") \
             from err
     if version != "git":
-        repo.git.checkout(version)
+        try:
+            repo.git.checkout(version)
+        except git.GitCommandError:
+            # try again after pulling new tags from origin
+            repo.git.fetch("origin", "--tags")
+            repo.git.checkout(version)
     sms = repo.submodules
     for sm in sms:
         if not sm.module_exists():
