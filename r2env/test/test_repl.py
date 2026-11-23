@@ -1,7 +1,7 @@
 from mock import patch
 import unittest
 
-from r2env.repl import REPL
+from r2env.repl import REPL, main
 from r2env.exceptions import ActionException
 
 
@@ -53,3 +53,12 @@ class TestRepl(unittest.TestCase):
         with self.assertRaises(ActionException):
             self.repl.run_action(invalid_action)
 
+
+class TestListFlag(unittest.TestCase):
+    @patch("r2env.repl.R2Env")
+    def test_list_without_positional_action(self, mock_core):
+        for flag in ("-l", "--list"):
+            with self.subTest(flag=flag), patch("sys.argv", ["r2env", flag]):
+                main()
+                mock_core.return_value.list_packages.assert_called_once_with()
+                mock_core.return_value.list_packages.reset_mock()
